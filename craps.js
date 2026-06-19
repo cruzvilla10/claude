@@ -32,7 +32,8 @@
   let state = loadState();
   let undoStack = [];    // [{ key, amount }] — placements since last roll
   let flashKeys = [];    // bet keys that just won (for the gold flash)
-  let removeMode = false; // when on, tapping a bet takes it down (mobile-friendly)
+  let dragState = null;  // in-progress chip drag (drag a chip off a bet to remove)
+  const DRAG_THRESHOLD = 16; // px of movement before a press becomes a drag
 
   function loadState() {
     try {
@@ -55,7 +56,6 @@
       buyIn: $("#buyIn"),
       netPL: $("#netPL"),
       atRisk: $("#atRisk"),
-      removeBtn: $("#removeBtn"),
       die1: $("#die1"), die2: $("#die2"),
       resultNumber: $("#resultNumber"),
       winBanner: $("#winBanner"),
@@ -565,7 +565,14 @@
       const chip = document.createElement("div");
       chip.className = `placed-chip ${chipClass(bet.amount)}${t.pos ? " " + t.pos : ""}${won ? " win-chip" : ""}${t.cp ? " cp-chip" : ""}`;
       chip.textContent = `${bet.amount}`;
-      if (t.cp) { chip.dataset.num = bet.num; chip.dataset.side = t.cp; chip.title = "Tap to add odds"; }
+      // data used by tap (add) / drag (remove) handlers
+      chip.dataset.key = key;
+      chip.dataset.type = bet.type;
+      if (bet.num != null) chip.dataset.num = bet.num;
+      chip.dataset.payout = bet.payout || "";
+      if (t.cp) { chip.dataset.side = t.cp; chip.title = "Tap to add odds · drag off to remove"; }
+      else if (bet.type === "comeodds") chip.dataset.side = "come";
+      else if (bet.type === "dccomeodds") chip.dataset.side = "dc";
       t.el.appendChild(chip);
       if (won && t.el.classList) t.el.classList.add("flash-win");
     }
@@ -587,19 +594,10 @@
     (col && col.appendChild ? col : felt).appendChild(puck);
   }
 
-  // Scale the whole game so it always fits the viewport without scrolling.
-  // Uses the visual viewport when available (accurate on mobile browsers).
+  // Layout is fully fluid now (fills the viewport via CSS), so no JS scaling
+  // is needed. Kept as a no-op so existing listeners stay harmless.
   function fitScreen() {
-    const app = els.app;
-    if (!app || !app.style || typeof window === "undefined") return;
-    app.style.transform = "none";
-    const w = app.offsetWidth, h = app.offsetHeight;
-    if (!w || !h) return;
-    const vv = window.visualViewport;
-    const availW = (vv ? vv.width : window.innerWidth) - 8;
-    const availH = (vv ? vv.height : window.innerHeight) - 8;
-    const scale = Math.min(availW / w, availH / h, 2);
-    app.style.transform = `scale(${scale > 0 ? scale : 1})`;
+    if (els.app && els.app.style) els.app.style.transform = "none";
   }
 
   function renderHistory() {
@@ -627,8 +625,6 @@
       els.netPL.textContent = `${net > 0 ? "+" : net < 0 ? "−" : ""}$${Math.abs(net).toLocaleString()}`;
       els.netPL.className = `stat-val ${net > 0 ? "pos" : net < 0 ? "neg" : ""}`;
     }
-    if (els.removeBtn && els.removeBtn.classList) els.removeBtn.classList.toggle("active", removeMode);
-    if (els.felt && els.felt.classList) els.felt.classList.toggle("removing", removeMode);
     // mark point column
     if (els.felt && els.felt.querySelectorAll) {
       els.felt.querySelectorAll(".num-col").forEach((c) => {
@@ -681,24 +677,84 @@
     toastTimer = setTimeout(() => { els.toast.className = "toast"; }, 2500);
   }
 
+  // ---- Chip drag-to-remove / tap-to-add ------------------------------------
+  // Tapping a chip tops it up; dragging it off the bet takes it down.
+  function tapChip(chip) {
+    const type = chip.dataset.type;
+    const num = chip.dataset.num != null ? Number(chip.dataset.num) : null;
+    if (["comepoint", "dccomepoint", "comeodds", "dccomeodds"].includes(type)) {
+      addComeOdds(num, chip.dataset.side);
+    } else {
+      placeBet(type, num, chip.dataset.payout);
+    }
+  }
+  function onPointerDown(e) {
+    if (!e.target || !e.target.closest) return;
+    const chip = e.target.closest(".placed-chip");
+    const spot = e.target.closest(".bet-spot");
+    if (chip && chip.dataset.key) {
+      dragState = { kind: "chip", chip, key: chip.dataset.key, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, ox: 0, oy: 0 };
+      if (els.felt.setPointerCapture) { try { els.felt.setPointerCapture(e.pointerId); } catch (_) {} }
+      e.preventDefault();
+    } else if (spot) {
+      dragState = { kind: "spot", type: spot.dataset.bet, num: spot.dataset.num ? Number(spot.dataset.num) : null, payout: spot.dataset.payout, x0: e.clientX, y0: e.clientY, moved: false };
+    }
+  }
+  function onPointerMove(e) {
+    const d = dragState; if (!d) return;
+    if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > DRAG_THRESHOLD) d.moved = true;
+    if (d.kind === "chip" && d.moved) {
+      if (!d.ghost) {
+        const rect = d.chip.getBoundingClientRect();
+        d.ox = d.x0 - rect.left; d.oy = d.y0 - rect.top;
+        const g = d.chip.cloneNode(true);
+        g.className = d.chip.className + " drag-ghost";
+        g.style.position = "fixed"; g.style.margin = "0"; g.style.transform = "none";
+        g.style.width = rect.width + "px"; g.style.height = rect.height + "px";
+        g.style.pointerEvents = "none"; g.style.zIndex = "999";
+        document.body.appendChild(g);
+        d.ghost = g;
+        d.chip.style.visibility = "hidden";
+      }
+      d.ghost.style.left = (e.clientX - d.ox) + "px";
+      d.ghost.style.top = (e.clientY - d.oy) + "px";
+      const bet = state.bets[d.key];
+      d.ghost.classList.toggle("ghost-remove", !!(bet && isRemovable(d.key, bet)));
+    }
+  }
+  function onPointerUp() {
+    const d = dragState; dragState = null;
+    if (!d) return;
+    if (d.kind === "chip") {
+      if (d.ghost) d.ghost.remove();
+      if (d.chip) d.chip.style.visibility = "";
+      if (d.moved) {
+        const bet = state.bets[d.key];
+        if (bet && isRemovable(d.key, bet)) removeBet(d.key);
+        else if (bet) toast("That's a contract bet — it can't be taken down.");
+      } else {
+        tapChip(d.chip);
+      }
+    } else if (d.kind === "spot" && !d.moved) {
+      placeBet(d.type, d.num, d.payout);
+    }
+  }
+  function onPointerCancel() {
+    const d = dragState; dragState = null;
+    if (d && d.ghost) d.ghost.remove();
+    if (d && d.chip) d.chip.style.visibility = "";
+  }
+
   // ---- Wiring ---------------------------------------------------------------
   function wire() {
     els.chipRail.addEventListener("click", (e) => {
       const chip = e.target.closest(".chip"); if (!chip) return;
       state.selectedChip = Number(chip.dataset.chip); save(); render();
     });
-    els.felt.addEventListener("click", (e) => {
-      const col = e.target.closest(".num-col");
-      const cpChip = e.target.closest(".cp-chip");
-      const spot = e.target.closest(".bet-spot");
-      if (removeMode) {
-        removeViaSpot(spot && spot.dataset.bet, spot && spot.dataset.num ? Number(spot.dataset.num) : null, col);
-        return;
-      }
-      if (cpChip) { addComeOdds(Number(cpChip.dataset.num), cpChip.dataset.side); return; }
-      if (!spot) return;
-      placeBet(spot.dataset.bet, spot.dataset.num ? Number(spot.dataset.num) : null, spot.dataset.payout);
-    });
+    els.felt.addEventListener("pointerdown", onPointerDown);
+    els.felt.addEventListener("pointermove", onPointerMove);
+    els.felt.addEventListener("pointerup", onPointerUp);
+    els.felt.addEventListener("pointercancel", onPointerCancel);
     els.felt.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       const col = e.target.closest(".num-col");
@@ -709,11 +765,6 @@
     els.undoBtn.addEventListener("click", undo);
     els.rebetBtn.addEventListener("click", rebet);
     els.doubleBtn.addEventListener("click", doubleAll);
-    els.removeBtn.addEventListener("click", () => {
-      removeMode = !removeMode;
-      render();
-      toast(removeMode ? "Remove mode ON — tap a bet to take it down." : "Remove mode off.");
-    });
     els.resetBtn.addEventListener("click", () => {
       if (confirm("Reset bankroll to $1,000 and clear the table?")) {
         state = defaultState(); undoStack = []; flashKeys = [];
