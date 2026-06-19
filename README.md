@@ -5,13 +5,23 @@ step, no dependencies — open `index.html` and play.
 
 ## Play
 
+The easiest way — no install, no build:
+
 ```bash
-# from the project root, just open the file:
-xdg-open index.html      # Linux
-open index.html          # macOS
-# or serve it:
-python3 -m http.server 8000   # then visit http://localhost:8000
+./launch.sh            # serves the game and opens your browser
 ```
+
+Other options:
+
+```bash
+npm start              # same thing via npm (serves on http://127.0.0.1:8000)
+xdg-open index.html    # Linux — just open the file directly
+open index.html        # macOS — just open the file directly
+```
+
+Any of these work because the game is a plain static page with no
+dependencies. If a script can't find a browser (e.g. a headless box), open
+`http://127.0.0.1:8000/index.html` yourself.
 
 ## How to play
 

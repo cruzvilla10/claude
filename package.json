@@ -1,0 +1,10 @@
+{
+  "name": "craps-table",
+  "version": "1.0.0",
+  "description": "Browser craps table game — full casino rules, single player vs the house.",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --bind 127.0.0.1",
+    "test": "node test/craps.test.js"
+  },
+  "license": "MIT"
+}
