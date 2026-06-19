@@ -437,23 +437,27 @@
     const tumble = setInterval(() => {
       renderDie(els.die1, 1 + Math.floor(Math.random() * 6));
       renderDie(els.die2, 1 + Math.floor(Math.random() * 6));
-    }, 80);
+    }, 55);
 
     setTimeout(() => {
       clearInterval(tumble);
       const d1 = 1 + Math.floor(Math.random() * 6);
       const d2 = 1 + Math.floor(Math.random() * 6);
-      [els.die1, els.die2].forEach((d) => d && d.classList && d.classList.remove("rolling"));
+      [els.die1, els.die2].forEach((d) => {
+        if (!d || !d.classList) return;
+        d.classList.remove("rolling");
+        restartAnim(d, "land");
+      });
       resolveRoll(d1, d2);
       rolling = false;
       if (els.rollBtn) els.rollBtn.disabled = false;
-    }, 650);
+    }, 820);
   }
 
   function showResult(d1, d2, total, netDelta) {
     renderDie(els.die1, d1);
     renderDie(els.die2, d2);
-    if (els.resultNumber) els.resultNumber.textContent = total;
+    if (els.resultNumber) { els.resultNumber.textContent = total; restartAnim(els.resultNumber, "pop"); }
     if (els.winBanner) {
       if (netDelta > 0) {
         els.winBanner.className = "win-banner show-win";
@@ -465,6 +469,57 @@
         els.winBanner.className = "win-banner";
         els.winBanner.textContent = "";
       }
+    }
+    if (typeof window === "undefined") return; // skip flair in headless tests
+    pulseNumber(total);
+    if (netDelta > 0) celebrate(netDelta);
+    else if (netDelta < 0) flashVignette("lose");
+  }
+
+  // ---- Flair: pulses, color wash, coin/confetti burst ----------------------
+  function restartAnim(el, cls) {
+    if (!el || !el.classList) return;
+    el.classList.remove(cls);
+    if (typeof el.offsetWidth === "number") void el.offsetWidth; // reflow → restart
+    el.classList.add(cls);
+  }
+  function pulseNumber(total) {
+    if (!els.felt || !els.felt.querySelector) return;
+    if (![4, 5, 6, 8, 9, 10].includes(total)) return;
+    restartAnim(els.felt.querySelector(`.num-col[data-cluster="${total}"] .num-box`), "hit");
+  }
+  function ensureLayer(id, cls) {
+    let el = document.getElementById(id);
+    if (!el) { el = document.createElement("div"); el.id = id; el.className = cls; document.body.appendChild(el); }
+    return el;
+  }
+  function flashVignette(kind) {
+    if (typeof document === "undefined") return;
+    const v = ensureLayer("vignette", "vignette");
+    v.className = "vignette";
+    if (typeof v.offsetWidth === "number") void v.offsetWidth;
+    v.className = `vignette ${kind}`;
+  }
+  function celebrate(amount) {
+    flashVignette("win");
+    spawnConfetti(Math.min(90, 26 + Math.floor(amount / 8)));
+  }
+  function spawnConfetti(count) {
+    if (typeof document === "undefined") return;
+    const layer = ensureLayer("fx", "fx-layer");
+    const colors = ["#f3c34a", "#51e08a", "#ffffff", "#e23b48", "#6a2da0"];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("div");
+      const coin = Math.random() < 0.55;
+      p.className = `confetti ${coin ? "coin" : "bit"}`;
+      if (!coin) p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.setProperty("--tx", `${(Math.random() * 2 - 1) * 46}vw`);
+      p.style.setProperty("--ty", `${28 + Math.random() * 55}vh`);
+      p.style.setProperty("--rot", `${Math.floor(Math.random() * 720 - 360)}deg`);
+      p.style.animationDelay = `${Math.random() * 0.12}s`;
+      p.style.left = `${48 + Math.random() * 4}%`;
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 1700);
     }
   }
 
