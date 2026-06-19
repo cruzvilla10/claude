@@ -51,7 +51,7 @@ eq(craps.trueOddsProfit(6, 12), 14.4, "true odds 6 -> 6:5");
 eq(craps.layOddsProfit(4, 20), 10, "lay odds 4 -> 1:2");
 eq(craps.layOddsProfit(5, 30), 20, "lay odds 5 -> 2:3");
 eq(craps.placeProfit(6, 12), 14, "place 6 -> 7:6");
-eq(craps.placeProfit(4, 10), 18, "place 4 -> 9:5");
+eq(craps.placeProfit(4, 10), 20, "place 4 -> 2:1");
 
 // ==== Point transitions ====================================================
 eq(craps.nextPoint(null, 7).point, null, "come-out 7 stays off");
