@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Craps</title>
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="app" id="app">
@@ -122,11 +122,9 @@
       </div>
 
       <div class="passline-row">
+        <div class="bet-spot odds-sq dont" data-bet="dpodds" data-payout="trueodds-dont"><span>DON'T<br>ODDS</span></div>
         <div class="bet-spot pass-line" data-bet="pass" data-payout="1:1"><span class="pass-title">PASS LINE</span></div>
-        <div class="odds-stack">
-          <div class="bet-spot odds-sq dont" data-bet="dpodds" data-payout="trueodds-dont"><span>DON'T ODDS</span></div>
-          <div class="bet-spot odds-sq" data-bet="passodds" data-payout="trueodds"><span>PASS ODDS</span></div>
-        </div>
+        <div class="bet-spot odds-sq" data-bet="passodds" data-payout="trueodds"><span>PASS<br>ODDS</span></div>
       </div>
 
       <div class="puck off" id="puck">OFF</div>
@@ -190,6 +188,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="craps.js?v=3"></script>
+  <script src="craps.js?v=4"></script>
 </body>
 </html>

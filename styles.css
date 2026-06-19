@@ -98,9 +98,8 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .field-word { font-size: clamp(0.85rem, 3.1vmin, 1.2rem); font-weight: 800; color: #fff; letter-spacing: 2px; }
 
 .dont-pass { flex: 0.85; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 4px; color: var(--red); font-weight: 800; letter-spacing: 1px; font-size: clamp(0.7rem, 2.3vmin, 0.9rem); }
-.passline-row { flex: 1.8; display: grid; grid-template-columns: 3fr 1fr; gap: 4px; }
-.odds-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 4px; min-height: 0; }
-.odds-sq { border: 1px dashed var(--line-soft); border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: clamp(0.42rem, 1.4vmin, 0.56rem); font-weight: 800; letter-spacing: 0.5px; color: var(--muted); line-height: 1.05; padding: 2px; overflow: hidden; }
+.passline-row { flex: 1.4; display: grid; grid-template-columns: 1fr 4fr 1fr; gap: 4px; }
+.odds-sq { border: 1px dashed var(--line-soft); border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: clamp(0.46rem, 1.6vmin, 0.6rem); font-weight: 800; letter-spacing: 0.5px; color: var(--muted); line-height: 1.05; padding: 2px; overflow: hidden; }
 .odds-sq.dont { color: #ff8a8a; }
 .pass-line { border: 1px solid var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; background: rgba(243,195,74,0.06); }
 .pass-title { font-size: clamp(1rem, 3.7vmin, 1.4rem); font-weight: 800; color: var(--gold); letter-spacing: 3px; }
