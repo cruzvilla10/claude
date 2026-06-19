@@ -21,6 +21,7 @@
   // ---- State ----------------------------------------------------------------
   const defaultState = () => ({
     bankroll: START_BANKROLL,
+    buyIn: START_BANKROLL, // total cashed in this session (for net P/L)
     point: null,
     selectedChip: 25,
     bets: {},            // key -> { type, num, amount }
@@ -31,6 +32,7 @@
   let state = loadState();
   let undoStack = [];    // [{ key, amount }] — placements since last roll
   let flashKeys = [];    // bet keys that just won (for the gold flash)
+  let removeMode = false; // when on, tapping a bet takes it down (mobile-friendly)
 
   function loadState() {
     try {
@@ -50,6 +52,10 @@
     els = {
       app: $("#app"),
       bankroll: $("#bankroll"),
+      buyIn: $("#buyIn"),
+      netPL: $("#netPL"),
+      atRisk: $("#atRisk"),
+      removeBtn: $("#removeBtn"),
       die1: $("#die1"), die2: $("#die2"),
       resultNumber: $("#resultNumber"),
       winBanner: $("#winBanner"),
@@ -92,6 +98,7 @@
       case "any7": case "anycraps": case "ce": case "horn":
       case "prop2": case "prop3": case "prop11": case "prop12":
       case "come": case "dontcome": case "passodds": case "dpodds":
+      case "comeodds": case "dccomeodds":
         return true;
       case "pass": case "dontpass":
         return state.point === null;
@@ -146,6 +153,23 @@
     save(); render();
   }
 
+  // Lay odds behind an established Come / Don't Come point (tap its chip).
+  function addComeOdds(num, side) {
+    const baseKey = side === "dc" ? `dccomepoint-${num}` : `comepoint-${num}`;
+    const base = state.bets[baseKey];
+    if (!base) return;
+    const amount = state.selectedChip;
+    if (amount > state.bankroll) { toast("Not enough bankroll for that chip.", "lose"); return; }
+    const type = side === "dc" ? "dccomeodds" : "comeodds";
+    const oddsKey = `${type}-${num}`;
+    const have = state.bets[oddsKey] ? state.bets[oddsKey].amount : 0;
+    const cap = base.amount * MAX_ODDS_MULT * (side === "dc" ? 2 : 1);
+    if (have + amount > cap) { toast(`Max odds reached on ${side === "dc" ? "Don't " : ""}Come ${num}.`, "lose"); return; }
+    addToBet(type, num, side === "dc" ? "trueodds-dont" : "trueodds", amount, true);
+    save(); render();
+    toast(`Odds on ${side === "dc" ? "Don't " : ""}Come ${num}: +$${amount}.`);
+  }
+
   function removeBet(key) {
     const bet = state.bets[key];
     if (!bet) return;
@@ -154,6 +178,21 @@
     delete state.bets[key];
     save(); render();
     toast(`Took down ${prettyName(key, bet)} — $${bet.amount} back.`);
+  }
+
+  // Find and remove the removable bet a tap landed on (spot or number column).
+  function removeViaSpot(type, num, col) {
+    if (type) {
+      const key = betKeyFor(type, num);
+      if (state.bets[key] && isRemovable(key, state.bets[key])) { removeBet(key); return; }
+    }
+    if (col && col.dataset) {
+      const n = col.dataset.cluster;
+      for (const cand of [`comeodds-${n}`, `dccomeodds-${n}`, `place-${n}`]) {
+        if (state.bets[cand]) { removeBet(cand); return; }
+      }
+    }
+    toast("Nothing to take down there.");
   }
 
   function undo() {
@@ -253,6 +292,14 @@
         if (total === 7) return win(bet.amount, false);
         if (total === n) return lose();
         return stay();
+      case "comeodds":
+        if (total === n) return win(floor(trueOddsProfit(n, bet.amount)), false);
+        if (total === 7) return lose();
+        return stay();
+      case "dccomeodds":
+        if (total === 7) return win(floor(layOddsProfit(n, bet.amount)), false);
+        if (total === n) return lose();
+        return stay();
       case "field":
         if (total === 2 || total === 12) return win(bet.amount * 2, false);
         if ([3, 4, 9, 10, 11].includes(total)) return win(bet.amount, false);
@@ -342,7 +389,7 @@
       const bet = state.bets["come"];
       if (total === 7 || total === 11) { state.bankroll += bet.amount * 2; netDelta += bet.amount; messages.push({ cls: "log-win", text: `Come wins +$${bet.amount}` }); }
       else if ([2, 3, 12].includes(total)) { netDelta -= bet.amount; messages.push({ cls: "log-lose", text: `Come loses -$${bet.amount}` }); }
-      else { mergeBet(`comepoint-${total}`, { type: "comepoint", num: total, payout: "1:1" }, bet.amount); messages.push({ cls: "log-info", text: `Come travels to ${total}` }); }
+      else { mergeBet(`comepoint-${total}`, { type: "comepoint", num: total, payout: "1:1" }, bet.amount); messages.push({ cls: "log-info", text: `Come travels to ${total} — tap its chip to add odds` }); }
       delete state.bets["come"];
     }
     if (state.bets["dontcome"]) {
@@ -462,6 +509,7 @@
       case "passodds": return "Pass Odds"; case "dpodds": return "Don't Odds";
       case "come": return "Come"; case "dontcome": return "Don't Come";
       case "comepoint": return `Come ${n}`; case "dccomepoint": return `Don't Come ${n}`;
+      case "comeodds": return `Come ${n} Odds`; case "dccomeodds": return `Don't Come ${n} Odds`;
       case "place": return `Place ${n}`; case "lay": return `Lay ${n}`; case "hard": return `Hard ${n}`;
       case "field": return "Field"; case "any7": return "Seven"; case "anycraps": return "Any Craps";
       case "ce": return "C & E"; case "horn": return "Horn";
@@ -489,8 +537,10 @@
       case "field": return { el: q('[data-bet="field"]') };
       case "place": return { el: q(`.num-chip-slot[data-slot="${bet.num}"]`), flat: true };
       case "hard": return { el: q(`[data-bet="hard"][data-num="${bet.num}"]`) };
-      case "comepoint": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "badge-tr" };
-      case "dccomepoint": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "badge-tl" };
+      case "comepoint": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "badge-tr", cp: "come" };
+      case "dccomepoint": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "badge-tl", cp: "dc" };
+      case "comeodds": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "odds-tr" };
+      case "dccomeodds": return { el: q(`.num-col[data-cluster="${bet.num}"]`), pos: "odds-tl" };
       case "any7": return { el: q('[data-bet="any7"]') };
       case "anycraps": return { el: q('[data-bet="anycraps"]') };
       case "ce": return { el: q('[data-bet="ce"]') };
@@ -513,8 +563,9 @@
       if (!t || !t.el || !t.el.appendChild) continue;
       const won = flashKeys.includes(key);
       const chip = document.createElement("div");
-      chip.className = `placed-chip ${chipClass(bet.amount)}${t.pos ? " " + t.pos : ""}${won ? " win-chip" : ""}`;
+      chip.className = `placed-chip ${chipClass(bet.amount)}${t.pos ? " " + t.pos : ""}${won ? " win-chip" : ""}${t.cp ? " cp-chip" : ""}`;
       chip.textContent = `${bet.amount}`;
+      if (t.cp) { chip.dataset.num = bet.num; chip.dataset.side = t.cp; chip.title = "Tap to add odds"; }
       t.el.appendChild(chip);
       if (won && t.el.classList) t.el.classList.add("flash-win");
     }
@@ -537,13 +588,17 @@
   }
 
   // Scale the whole game so it always fits the viewport without scrolling.
+  // Uses the visual viewport when available (accurate on mobile browsers).
   function fitScreen() {
     const app = els.app;
     if (!app || !app.style || typeof window === "undefined") return;
     app.style.transform = "none";
     const w = app.offsetWidth, h = app.offsetHeight;
     if (!w || !h) return;
-    const scale = Math.min((window.innerWidth - 12) / w, (window.innerHeight - 12) / h, 2);
+    const vv = window.visualViewport;
+    const availW = (vv ? vv.width : window.innerWidth) - 8;
+    const availH = (vv ? vv.height : window.innerHeight) - 8;
+    const scale = Math.min(availW / w, availH / h, 2);
     app.style.transform = `scale(${scale > 0 ? scale : 1})`;
   }
 
@@ -558,8 +613,22 @@
     });
   }
 
+  function atRiskTotal() {
+    return Object.values(state.bets).reduce((s, b) => s + b.amount, 0);
+  }
+
   function render() {
+    const atRisk = atRiskTotal();
+    const net = state.bankroll + atRisk - state.buyIn;
     if (els.bankroll) els.bankroll.textContent = `$${state.bankroll.toLocaleString()}`;
+    if (els.buyIn) els.buyIn.textContent = `$${state.buyIn.toLocaleString()}`;
+    if (els.atRisk) els.atRisk.textContent = `$${atRisk.toLocaleString()}`;
+    if (els.netPL) {
+      els.netPL.textContent = `${net > 0 ? "+" : net < 0 ? "−" : ""}$${Math.abs(net).toLocaleString()}`;
+      els.netPL.className = `stat-val ${net > 0 ? "pos" : net < 0 ? "neg" : ""}`;
+    }
+    if (els.removeBtn && els.removeBtn.classList) els.removeBtn.classList.toggle("active", removeMode);
+    if (els.felt && els.felt.classList) els.felt.classList.toggle("removing", removeMode);
     // mark point column
     if (els.felt && els.felt.querySelectorAll) {
       els.felt.querySelectorAll(".num-col").forEach((c) => {
@@ -609,7 +678,7 @@
     els.toast.textContent = msg;
     els.toast.className = `toast show ${kind || ""}`;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { els.toast.className = "toast"; }, 2000);
+    toastTimer = setTimeout(() => { els.toast.className = "toast"; }, 2500);
   }
 
   // ---- Wiring ---------------------------------------------------------------
@@ -619,26 +688,32 @@
       state.selectedChip = Number(chip.dataset.chip); save(); render();
     });
     els.felt.addEventListener("click", (e) => {
-      const spot = e.target.closest(".bet-spot"); if (!spot) return;
+      const col = e.target.closest(".num-col");
+      const cpChip = e.target.closest(".cp-chip");
+      const spot = e.target.closest(".bet-spot");
+      if (removeMode) {
+        removeViaSpot(spot && spot.dataset.bet, spot && spot.dataset.num ? Number(spot.dataset.num) : null, col);
+        return;
+      }
+      if (cpChip) { addComeOdds(Number(cpChip.dataset.num), cpChip.dataset.side); return; }
+      if (!spot) return;
       placeBet(spot.dataset.bet, spot.dataset.num ? Number(spot.dataset.num) : null, spot.dataset.payout);
     });
     els.felt.addEventListener("contextmenu", (e) => {
-      const spot = e.target.closest(".bet-spot"); if (!spot) return;
       e.preventDefault();
-      const type = spot.dataset.bet, num = spot.dataset.num ? Number(spot.dataset.num) : null;
-      let key = betKeyFor(type, num);
-      if (!state.bets[key]) {
-        const col = e.target.closest(".num-col");
-        if (col) for (const cand of [`comepoint-${col.dataset.cluster}`, `dccomepoint-${col.dataset.cluster}`, `place-${col.dataset.cluster}`]) {
-          if (state.bets[cand]) { key = cand; break; }
-        }
-      }
-      removeBet(key);
+      const col = e.target.closest(".num-col");
+      const spot = e.target.closest(".bet-spot");
+      removeViaSpot(spot && spot.dataset.bet, spot && spot.dataset.num ? Number(spot.dataset.num) : null, col);
     });
     els.rollBtn.addEventListener("click", roll);
     els.undoBtn.addEventListener("click", undo);
     els.rebetBtn.addEventListener("click", rebet);
     els.doubleBtn.addEventListener("click", doubleAll);
+    els.removeBtn.addEventListener("click", () => {
+      removeMode = !removeMode;
+      render();
+      toast(removeMode ? "Remove mode ON — tap a bet to take it down." : "Remove mode off.");
+    });
     els.resetBtn.addEventListener("click", () => {
       if (confirm("Reset bankroll to $1,000 and clear the table?")) {
         state = defaultState(); undoStack = []; flashKeys = [];
@@ -659,6 +734,8 @@
     if (typeof window !== "undefined") {
       window.addEventListener("resize", fitScreen);
       window.addEventListener("orientationchange", fitScreen);
+      window.addEventListener("load", fitScreen);
+      if (window.visualViewport) window.visualViewport.addEventListener("resize", fitScreen);
     }
     const logWrap = document.querySelector(".log-wrap");
     if (logWrap && logWrap.addEventListener) logWrap.addEventListener("toggle", fitScreen);

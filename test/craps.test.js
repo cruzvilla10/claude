@@ -140,6 +140,16 @@ eq(s.bankroll, 1010, "come point 6 wins even money (net +10)");
 s = rollWith({ point: 5, bets: { come: { type: "come", num: null, amount: 10 } } }, 3, 4);
 eq(s.bankroll, 1010, "come pending wins on 7 (net +10)");
 
+// ==== Come odds ============================================================
+s = rollWith({ point: 5, bets: { "comeodds-6": { type: "comeodds", num: 6, amount: 10 } } }, 3, 3); // 6 hits
+eq(s.bankroll, 1012, "come 6 odds win true odds (6:5 -> +12)");
+s = rollWith({ point: 5, bets: { "comeodds-6": { type: "comeodds", num: 6, amount: 10 } } }, 3, 4); // 7
+eq(s.bankroll, 990, "come 6 odds lose on 7");
+s = rollWith({ point: 5, bets: { "dccomeodds-4": { type: "dccomeodds", num: 4, amount: 20 } } }, 3, 4); // 7 wins
+eq(s.bankroll, 1010, "don't come 4 odds win on 7 (1:2 -> +10)");
+s = rollWith({ point: 5, bets: { "dccomeodds-4": { type: "dccomeodds", num: 4, amount: 20 } } }, 2, 2); // 4
+eq(s.bankroll, 980, "don't come 4 odds lose when 4 rolls");
+
 // ==== Lay bet ==============================================================
 s = rollWith({ point: 5, bets: { "lay-4": { type: "lay", num: 4, amount: 20 } } }, 3, 4); // 7 wins
 eq(s.bankroll, 990, "lay 4 wins on 7 (+10 profit, $20 stake stays on table)");
