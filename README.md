@@ -5,10 +5,11 @@ step, no dependencies, nothing to install.
 
 ## Play
 
-**▶ Live game:** https://raw.githack.com/cruzvilla10/claude/main/index.html
+**▶ Live game:** https://cruzvilla10.github.io/claude/
 
-Bookmark that link and play anytime — it serves the latest version straight
-from this repo, so any update appears on a refresh.
+Bookmark that link and play anytime. It's hosted on GitHub Pages and
+auto-deploys on every push to `main` (see `.github/workflows/pages.yml`),
+so the latest version is always live — just refresh.
 
 > Prefer to run it offline? Because it's a plain static page, you can also just
 > download `index.html`, `styles.css`, and `craps.js` into one folder and open
