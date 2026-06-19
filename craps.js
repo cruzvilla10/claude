@@ -180,7 +180,7 @@
   function removeBet(key) {
     const bet = state.bets[key];
     if (!bet) return;
-    if (!isRemovable(key, bet)) { toast("That's a contract bet — can't be taken down now."); return; }
+    if (!isRemovable(key, bet)) return; // contract bet — silently ignore
     state.bankroll += bet.amount;
     delete state.bets[key];
     save(); render();   // silent — no toast on removal
@@ -803,8 +803,7 @@
       }
       if (removing) {
         const bet = state.bets[d.key];
-        if (bet && isRemovable(d.key, bet)) removeBet(d.key);
-        else if (bet) toast("That's a contract bet — it can't be taken down.");
+        if (bet && isRemovable(d.key, bet)) removeBet(d.key); // silent; contract bets just stay
       } else {
         tapChipAdd(d.chip);
       }
