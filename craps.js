@@ -745,17 +745,9 @@
     toastTimer = setTimeout(() => { els.toast.className = "toast"; }, 2500);
   }
 
-  // ---- Chip drag-to-remove / tap-to-add ------------------------------------
-  // Tapping a chip tops it up; dragging it off the bet takes it down.
-  function tapChip(chip) {
-    const type = chip.dataset.type;
-    const num = chip.dataset.num != null ? Number(chip.dataset.num) : null;
-    if (["comepoint", "dccomepoint", "comeodds", "dccomeodds"].includes(type)) {
-      addComeOdds(num, chip.dataset.side);
-    } else {
-      placeBet(type, num, chip.dataset.payout);
-    }
-  }
+  // ---- Chip interactions ----------------------------------------------------
+  // Tap an open bet area to add a chip. Tap a placed chip to take it down
+  // (a come-point chip adds odds instead). Dragging a chip off also removes it.
   function onPointerDown(e) {
     if (!e.target || !e.target.closest) return;
     const chip = e.target.closest(".placed-chip");
@@ -796,13 +788,15 @@
     if (d.kind === "chip") {
       if (d.ghost) d.ghost.remove();
       if (d.chip) d.chip.style.visibility = "";
-      if (d.moved) {
-        const bet = state.bets[d.key];
-        if (bet && isRemovable(d.key, bet)) removeBet(d.key);
-        else if (bet) toast("That's a contract bet — it can't be taken down.");
-      } else {
-        tapChip(d.chip);
+      const type = d.chip && d.chip.dataset.type;
+      // A come-point chip is a contract: tapping or dragging it adds odds.
+      if (type === "comepoint" || type === "dccomepoint") {
+        addComeOdds(Number(d.chip.dataset.num), d.chip.dataset.side);
+        return;
       }
+      const bet = state.bets[d.key];
+      if (bet && isRemovable(d.key, bet)) removeBet(d.key);
+      else if (bet) toast("That's a contract bet — it can't be taken down.");
     } else if (d.kind === "spot" && !d.moved) {
       placeBet(d.type, d.num, d.payout);
     }

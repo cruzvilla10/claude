@@ -117,7 +117,7 @@ body {
 .placed-chip { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; color: #fff; border: 2px dashed rgba(255,255,255,0.85); box-shadow: var(--shadow); }
 .placed-chip.win-chip { background: var(--gold) !important; color: #1a1207; border-color: #fff; animation: pop 0.5s ease; }
 @keyframes pop { 0%{transform:scale(1);} 50%{transform:scale(1.35);} 100%{transform:scale(1);} }
-.felt .placed-chip { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 3; pointer-events: auto; cursor: pointer; }
+.felt .placed-chip { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 3; pointer-events: auto; cursor: pointer; touch-action: none; }
 .felt .placed-chip.badge-tr { left: auto; right: 2px; top: 1px; transform: none; width: 23px; height: 23px; font-size: 0.48rem; border-style: solid; }
 .felt .placed-chip.badge-tl { left: 2px; top: 1px; transform: none; width: 23px; height: 23px; font-size: 0.48rem; border-style: solid; }
 .felt .placed-chip.odds-tr { left: auto; right: 2px; top: auto; bottom: 2px; transform: none; width: 21px; height: 21px; font-size: 0.44rem; border: 2px solid var(--gold); }
@@ -183,6 +183,7 @@ body {
 .win-banner.show-lose { color: #ff8a8a; }
 
 .controls { display: flex; flex-direction: column; gap: 7px; }
+.hint { text-align: center; font-size: 0.62rem; color: var(--muted); margin: -2px 0 0; }
 .chip-rail { display: flex; gap: 6px; justify-content: center; }
 .chip { width: 44px; height: 44px; border-radius: 50%; border: 3px dashed rgba(255,255,255,0.85); color: #fff; font-weight: 800; font-size: 0.74rem; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.1s; }
 .chip.selected { outline: 3px solid var(--gold); outline-offset: 1px; transform: translateY(-3px); }
