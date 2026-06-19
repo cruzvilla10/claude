@@ -48,6 +48,7 @@
   function initEls() {
     const $ = (s) => document.querySelector(s);
     els = {
+      app: $("#app"),
       bankroll: $("#bankroll"),
       die1: $("#die1"), die2: $("#die2"),
       resultNumber: $("#resultNumber"),
@@ -519,23 +520,31 @@
     }
   }
 
+  // Place the puck by relocating the DOM node (no pixel math => scale-safe).
   function positionPuck() {
-    if (!els.puck || !els.felt) return;
+    const puck = els.puck, felt = els.felt;
+    if (!puck || !felt || !felt.appendChild) return;
     if (state.point === null) {
-      els.puck.className = "puck off";
-      els.puck.textContent = "OFF";
-      els.puck.style.top = ""; els.puck.style.left = "";
+      puck.className = "puck off";
+      puck.textContent = "OFF";
+      felt.appendChild(puck);
       return;
     }
-    els.puck.className = "puck on";
-    els.puck.textContent = "ON";
-    const cell = els.felt.querySelector && els.felt.querySelector(`.num-col[data-cluster="${state.point}"] .num-box`);
-    if (cell && cell.getBoundingClientRect && els.felt.getBoundingClientRect) {
-      const cr = cell.getBoundingClientRect();
-      const fr = els.felt.getBoundingClientRect();
-      els.puck.style.top = `${cr.top - fr.top - 8}px`;
-      els.puck.style.left = `${cr.left - fr.left + cr.width / 2 - 19}px`;
-    }
+    puck.className = "puck on";
+    puck.textContent = "ON";
+    const col = felt.querySelector && felt.querySelector(`.num-col[data-cluster="${state.point}"]`);
+    (col && col.appendChild ? col : felt).appendChild(puck);
+  }
+
+  // Scale the whole game so it always fits the viewport without scrolling.
+  function fitScreen() {
+    const app = els.app;
+    if (!app || !app.style || typeof window === "undefined") return;
+    app.style.transform = "none";
+    const w = app.offsetWidth, h = app.offsetHeight;
+    if (!w || !h) return;
+    const scale = Math.min((window.innerWidth - 12) / w, (window.innerHeight - 12) / h, 2);
+    app.style.transform = `scale(${scale > 0 ? scale : 1})`;
   }
 
   function renderHistory() {
@@ -647,7 +656,12 @@
         e.preventDefault(); roll();
       }
     });
-    if (typeof window !== "undefined") window.addEventListener("resize", positionPuck);
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", fitScreen);
+      window.addEventListener("orientationchange", fitScreen);
+    }
+    const logWrap = document.querySelector(".log-wrap");
+    if (logWrap && logWrap.addEventListener) logWrap.addEventListener("toggle", fitScreen);
   }
 
   // ---- Boot -----------------------------------------------------------------
@@ -658,6 +672,11 @@
     renderDie(els.die1, 3); renderDie(els.die2, 4);
     render();
     addLog("Welcome. Place a Pass Line bet to start.", "log-info");
+    if (typeof window !== "undefined") {
+      fitScreen();
+      setTimeout(fitScreen, 60);
+      setTimeout(fitScreen, 300);
+    }
   }
 
   if (typeof document !== "undefined") boot();

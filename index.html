@@ -7,33 +7,11 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
+  <div class="app" id="app">
 
-    <!-- Title bar -->
-    <header class="appbar">
-      <span class="back">‹</span>
-      <span class="appbar-title">PLAYING <strong>CRAPS</strong></span>
-      <div class="appbar-bank">
-        <span class="bank-label">BANKROLL</span>
-        <span id="bankroll" class="bank-value">$1,000</span>
-      </div>
-    </header>
-
-    <!-- Result stage: dice, big total, win banner, history -->
-    <section class="stage">
-      <div class="history" id="history" aria-label="Recent rolls"></div>
-      <div class="dice-area">
-        <div class="die3d" id="die1"></div>
-        <div class="die3d" id="die2"></div>
-      </div>
-      <div class="result-number" id="resultNumber">—</div>
-      <div class="win-banner" id="winBanner"></div>
-    </section>
-
-    <!-- Felt betting panel -->
+    <!-- Betting table -->
     <section class="felt">
 
-      <!-- Center proposition header -->
       <div class="prop-header">
         <div class="bet-spot prop-cell" data-bet="any7" data-payout="4:1">
           <span class="ph-name">SEVEN</span><span class="ph-pay">4:1</span>
@@ -46,7 +24,6 @@
         </div>
       </div>
 
-      <!-- Hardways + one-roll grid -->
       <div class="prop-grid">
         <div class="bet-spot prop-die" data-bet="hard" data-num="4" data-payout="7:1">
           <span class="pips-pair" data-faces="2,2"></span><span class="pd-pay">7:1</span>
@@ -78,7 +55,6 @@
         </div>
       </div>
 
-      <!-- Place numbers 4 5 6 8 9 10 -->
       <div class="numbers">
         <div class="num-col" data-cluster="4">
           <div class="num-status" data-num="4">LOSE</div>
@@ -112,72 +88,78 @@
         </div>
       </div>
 
-      <!-- Come row -->
       <div class="come-row">
         <div class="bet-spot dont-come" data-bet="dontcome" data-payout="1:1">
-          <span>DON'T<br>COME<br>BAR</span>
-          <span class="mini-dice" data-faces="6,6"></span>
+          <span>DON'T<br>COME</span>
         </div>
         <div class="bet-spot come-box" data-bet="come" data-payout="1:1">
           <span class="come-title">COME</span>
         </div>
       </div>
 
-      <!-- Field -->
       <div class="bet-spot field-box" data-bet="field" data-payout="field">
-        <span class="field-end"><span class="dbl">PAYS DOUBLE</span><span class="field-circ">2</span></span>
+        <span class="field-end"><span class="dbl">DOUBLE</span><span class="field-circ">2</span></span>
         <span class="field-mid"><span class="field-nums">3·4·9·10·11</span><span class="field-word">FIELD</span></span>
-        <span class="field-end"><span class="dbl">PAYS DOUBLE</span><span class="field-circ">12</span></span>
+        <span class="field-end"><span class="dbl">DOUBLE</span><span class="field-circ">12</span></span>
       </div>
 
-      <!-- Don't pass + odds -->
       <div class="bet-spot dont-pass" data-bet="dontpass" data-payout="1:1">
-        <span>DON'T PASS BAR</span><span class="mini-dice" data-faces="6,6"></span>
+        <span>DON'T PASS BAR</span>
       </div>
       <div class="odds-row">
         <div class="bet-spot odds-bar" data-bet="dpodds" data-payout="trueodds-dont">DON'T ODDS</div>
         <div class="bet-spot odds-bar" data-bet="passodds" data-payout="trueodds">PASS ODDS</div>
       </div>
 
-      <!-- Pass line -->
       <div class="bet-spot pass-line" data-bet="pass" data-payout="1:1">
         <span class="pass-title">PASS LINE</span>
       </div>
 
-      <!-- ON/OFF puck (positioned by JS) -->
-      <div class="puck" id="puck">OFF</div>
+      <div class="puck off" id="puck">OFF</div>
     </section>
 
-    <!-- Log (collapsible) -->
-    <details class="log-wrap">
-      <summary>Roll log</summary>
-      <div id="log" class="log" aria-live="polite"></div>
-    </details>
-
-    <!-- Bottom action bar -->
-    <footer class="actionbar">
-      <button class="act-btn" id="undoBtn" title="Undo last bet">
-        <span class="act-ico">↶</span><span class="act-label">UNDO</span>
-      </button>
-      <button class="act-btn" id="rebetBtn" title="Repeat last round's bets">
-        <span class="act-ico">⟳</span><span class="act-label">REBET</span>
-      </button>
-      <div class="chip-rail" id="chipRail">
-        <button class="chip c1" data-chip="1">1</button>
-        <button class="chip c5" data-chip="5">5</button>
-        <button class="chip c25 selected" data-chip="25">25</button>
-        <button class="chip c100" data-chip="100">100</button>
-        <button class="chip c500" data-chip="500">500</button>
+    <!-- Side panel: status, dice, controls -->
+    <aside class="panel">
+      <div class="panel-top">
+        <span class="brand">🎲 CRAPS</span>
+        <div class="bank">
+          <span class="bank-label">BANKROLL</span>
+          <span id="bankroll" class="bank-value">$1,000</span>
+        </div>
+        <button class="reset-btn" id="resetBtn" title="Reset bankroll to $1,000">⟲</button>
       </div>
-      <button class="act-btn" id="doubleBtn" title="Double every bet on the table">
-        <span class="act-ico">×2</span><span class="act-label">DOUBLE</span>
-      </button>
-      <button class="act-btn roll" id="rollBtn" title="Roll the dice">
-        <span class="act-ico">🎲</span><span class="act-label">ROLL</span>
-      </button>
-    </footer>
 
-    <button class="reset-fab" id="resetBtn" title="Reset bankroll to $1,000">⟲ $1000</button>
+      <div class="stage">
+        <div class="history" id="history" aria-label="Recent rolls"></div>
+        <div class="dice-area">
+          <div class="die3d" id="die1"></div>
+          <div class="die3d" id="die2"></div>
+        </div>
+        <div class="result-number" id="resultNumber">—</div>
+        <div class="win-banner" id="winBanner"></div>
+      </div>
+
+      <div class="controls">
+        <div class="chip-rail" id="chipRail">
+          <button class="chip c1" data-chip="1">1</button>
+          <button class="chip c5" data-chip="5">5</button>
+          <button class="chip c25 selected" data-chip="25">25</button>
+          <button class="chip c100" data-chip="100">100</button>
+          <button class="chip c500" data-chip="500">500</button>
+        </div>
+        <div class="action-row">
+          <button class="act-btn" id="undoBtn" title="Undo last bet"><span class="act-ico">↶</span><span class="act-label">UNDO</span></button>
+          <button class="act-btn" id="rebetBtn" title="Repeat last round's bets"><span class="act-ico">⟳</span><span class="act-label">REBET</span></button>
+          <button class="act-btn" id="doubleBtn" title="Double every bet on the table"><span class="act-ico">×2</span><span class="act-label">DOUBLE</span></button>
+        </div>
+        <button class="roll-btn" id="rollBtn">ROLL DICE</button>
+        <details class="log-wrap">
+          <summary>Roll log</summary>
+          <div id="log" class="log" aria-live="polite"></div>
+        </details>
+      </div>
+    </aside>
+
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
