@@ -1,27 +1,18 @@
 # 🎲 Craps Table
 
 A full-featured casino craps game that runs entirely in the browser. No build
-step, no dependencies — open `index.html` and play.
+step, no dependencies, nothing to install.
 
 ## Play
 
-The easiest way — no install, no build:
+**▶ Live game:** https://raw.githack.com/cruzvilla10/claude/main/index.html
 
-```bash
-./launch.sh            # serves the game and opens your browser
-```
+Bookmark that link and play anytime — it serves the latest version straight
+from this repo, so any update appears on a refresh.
 
-Other options:
-
-```bash
-npm start              # same thing via npm (serves on http://127.0.0.1:8000)
-xdg-open index.html    # Linux — just open the file directly
-open index.html        # macOS — just open the file directly
-```
-
-Any of these work because the game is a plain static page with no
-dependencies. If a script can't find a browser (e.g. a headless box), open
-`http://127.0.0.1:8000/index.html` yourself.
+> Prefer to run it offline? Because it's a plain static page, you can also just
+> download `index.html`, `styles.css`, and `craps.js` into one folder and open
+> `index.html` in any browser.
 
 The UI is styled after a live "bubble craps" table: a dark felt panel, props
 on top with pip-dice, the `4·5·6·8·9·10` place numbers with `LOSE`/`WIN`
