@@ -183,8 +183,7 @@
     if (!isRemovable(key, bet)) { toast("That's a contract bet — can't be taken down now."); return; }
     state.bankroll += bet.amount;
     delete state.bets[key];
-    save(); render();
-    toast(`Took down ${prettyName(key, bet)} — $${bet.amount} back.`);
+    save(); render();   // silent — no toast on removal
   }
 
   // Find and remove the removable bet a tap landed on (spot or number column).
@@ -199,7 +198,7 @@
         if (state.bets[cand]) { removeBet(cand); return; }
       }
     }
-    toast("Nothing to take down there.");
+    // nothing here — stay silent
   }
 
   function undo() {
@@ -869,8 +868,7 @@
     els.doubleBtn.addEventListener("click", doubleAll);
     els.removeBtn.addEventListener("click", () => {
       removeMode = !removeMode;
-      render();
-      toast(removeMode ? "Remove mode ON — tap a bet to take it down." : "Remove mode off.");
+      render();   // gold button + red table outline show the mode; no toast
     });
     els.resetBtn.addEventListener("click", openModal);
     els.modalCancel.addEventListener("click", closeModal);
