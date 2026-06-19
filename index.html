@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Craps Table</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🎲 Craps</h1>
+    <div class="bank">
+      <div class="bank-item">
+        <span class="bank-label">Bankroll</span>
+        <span id="bankroll" class="bank-value">$0</span>
+      </div>
+      <div class="bank-item">
+        <span class="bank-label">At Risk</span>
+        <span id="atRisk" class="bank-value">$0</span>
+      </div>
+      <div class="bank-item">
+        <span class="bank-label">Point</span>
+        <span id="pointVal" class="bank-value">OFF</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="resetBtn" class="btn btn-ghost" title="Reset bankroll to $1,000">Cash In / Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- The felt -->
+    <section class="table" aria-label="Craps table">
+      <div class="felt">
+
+        <!-- Top row: place / come boxes -->
+        <div class="numbers-row">
+          <div class="num-cell" data-cluster="4">
+            <div class="num-header">4</div>
+            <div class="bet-spot place" data-bet="place" data-num="4" data-payout="9:5"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="4" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+          <div class="num-cell" data-cluster="5">
+            <div class="num-header">5</div>
+            <div class="bet-spot place" data-bet="place" data-num="5" data-payout="7:5"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="5" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+          <div class="num-cell" data-cluster="6">
+            <div class="num-header">6</div>
+            <div class="bet-spot place" data-bet="place" data-num="6" data-payout="7:6"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="6" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+          <div class="num-cell" data-cluster="8">
+            <div class="num-header">8</div>
+            <div class="bet-spot place" data-bet="place" data-num="8" data-payout="7:6"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="8" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+          <div class="num-cell" data-cluster="9">
+            <div class="num-header">9</div>
+            <div class="bet-spot place" data-bet="place" data-num="9" data-payout="7:5"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="9" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+          <div class="num-cell" data-cluster="10">
+            <div class="num-header">10</div>
+            <div class="bet-spot place" data-bet="place" data-num="10" data-payout="9:5"><span class="spot-label">PLACE</span></div>
+            <div class="bet-spot buyodds dont" data-bet="lay" data-num="10" data-payout="lay"><span class="spot-label">LAY</span></div>
+          </div>
+        </div>
+
+        <!-- Come -->
+        <div class="bet-spot wide come" data-bet="come" data-payout="1:1">
+          <span class="spot-title">COME</span>
+        </div>
+
+        <!-- Field -->
+        <div class="bet-spot wide field" data-bet="field" data-payout="field">
+          <span class="spot-title">FIELD</span>
+          <span class="spot-sub">2 3 4 9 10 11 12 &nbsp;·&nbsp; 2 &amp; 12 pay double</span>
+        </div>
+
+        <!-- Don't Come + Don't Pass / Pass line -->
+        <div class="line-row">
+          <div class="bet-spot dontcome dont" data-bet="dontcome" data-payout="1:1">
+            <span class="spot-title">DON'T COME</span>
+          </div>
+          <div class="bet-spot dontpass dont" data-bet="dontpass" data-payout="1:1">
+            <span class="spot-title">DON'T PASS BAR <span class="bar">6·6</span></span>
+          </div>
+        </div>
+
+        <div class="line-row">
+          <div class="bet-spot oddsline" data-bet="dpodds" data-payout="trueodds-dont">
+            <span class="spot-title">DON'T PASS ODDS</span>
+          </div>
+          <div class="bet-spot oddsline" data-bet="passodds" data-payout="trueodds">
+            <span class="spot-title">PASS LINE ODDS</span>
+          </div>
+        </div>
+
+        <div class="bet-spot wide passline" data-bet="pass" data-payout="1:1">
+          <span class="spot-title">PASS LINE</span>
+        </div>
+
+        <!-- Center proposition area -->
+        <div class="center-props">
+          <div class="hardways">
+            <div class="bet-spot hard" data-bet="hard" data-num="4" data-payout="7:1"><span class="hw-dice">⚁⚁</span><span class="hw-pay">7:1</span><span class="spot-label">HARD 4</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="10" data-payout="7:1"><span class="hw-dice">⚄⚄</span><span class="hw-pay">7:1</span><span class="spot-label">HARD 10</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="6" data-payout="9:1"><span class="hw-dice">⚂⚂</span><span class="hw-pay">9:1</span><span class="spot-label">HARD 6</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="8" data-payout="9:1"><span class="hw-dice">⚃⚃</span><span class="hw-pay">9:1</span><span class="spot-label">HARD 8</span></div>
+          </div>
+          <div class="props">
+            <div class="bet-spot prop" data-bet="any7" data-payout="4:1"><span class="spot-label">ANY 7</span><span class="hw-pay">4:1</span></div>
+            <div class="bet-spot prop" data-bet="anycraps" data-payout="7:1"><span class="spot-label">ANY CRAPS</span><span class="hw-pay">7:1</span></div>
+            <div class="bet-spot prop" data-bet="ce" data-payout="ce"><span class="spot-label">C &amp; E</span><span class="hw-pay">3:1 / 7:1</span></div>
+            <div class="bet-spot prop" data-bet="horn" data-payout="horn"><span class="spot-label">HORN</span><span class="hw-pay">2·12 27:4 · 3·11 7:1</span></div>
+            <div class="bet-spot prop" data-bet="prop2" data-payout="30:1"><span class="spot-label">2 (Aces)</span><span class="hw-pay">30:1</span></div>
+            <div class="bet-spot prop" data-bet="prop12" data-payout="30:1"><span class="spot-label">12 (Boxcars)</span><span class="hw-pay">30:1</span></div>
+            <div class="bet-spot prop" data-bet="prop3" data-payout="15:1"><span class="spot-label">3 (Ace-Deuce)</span><span class="hw-pay">15:1</span></div>
+            <div class="bet-spot prop" data-bet="prop11" data-payout="15:1"><span class="spot-label">11 (Yo)</span><span class="hw-pay">15:1</span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Sidebar controls -->
+    <aside class="sidebar">
+      <div class="panel">
+        <h2>Chip</h2>
+        <div class="chips" id="chipTray">
+          <button class="chip chip-1" data-chip="1">$1</button>
+          <button class="chip chip-5" data-chip="5">$5</button>
+          <button class="chip chip-25 selected" data-chip="25">$25</button>
+          <button class="chip chip-100" data-chip="100">$100</button>
+          <button class="chip chip-500" data-chip="500">$500</button>
+        </div>
+        <p class="hint">Select a chip, then click a bet area on the table to place it. Right-click a bet to remove it (when allowed).</p>
+      </div>
+
+      <div class="panel">
+        <h2>Dice</h2>
+        <div class="dice-stage">
+          <div class="die" id="die1" aria-label="Die 1">⚀</div>
+          <div class="die" id="die2" aria-label="Die 2">⚀</div>
+        </div>
+        <div id="rollTotal" class="roll-total">—</div>
+        <button id="rollBtn" class="btn btn-primary btn-roll">ROLL DICE</button>
+      </div>
+
+      <div class="panel">
+        <h2>Log</h2>
+        <div id="log" class="log" aria-live="polite"></div>
+        <button id="clearBetsBtn" class="btn btn-ghost btn-small">Clear all removable bets</button>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="craps.js"></script>
+</body>
+</html>
