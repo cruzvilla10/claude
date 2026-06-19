@@ -655,19 +655,9 @@
     (col && col.appendChild ? col : felt).appendChild(puck);
   }
 
-  // The game is rendered at a comfortable fixed design size and scaled to
-  // fit the viewport — guarantees nothing overlaps and everything is visible.
+  // Layout fills the viewport fluidly via CSS; no JS scaling needed.
   function fitScreen() {
-    const app = els.app;
-    if (!app || !app.style || typeof window === "undefined") return;
-    app.style.transform = "none";
-    const w = app.offsetWidth, h = app.offsetHeight;
-    if (!w || !h) return;
-    const vv = window.visualViewport;
-    const availW = (vv ? vv.width : window.innerWidth);
-    const availH = (vv ? vv.height : window.innerHeight);
-    const scale = Math.min(availW / w, availH / h);
-    app.style.transform = `scale(${scale > 0 ? scale : 1})`;
+    if (els.app && els.app.style) els.app.style.transform = "none";
   }
 
   function renderHistory() {
