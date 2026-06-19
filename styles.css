@@ -98,8 +98,9 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .field-word { font-size: clamp(0.85rem, 3.1vmin, 1.2rem); font-weight: 800; color: #fff; letter-spacing: 2px; }
 
 .dont-pass { flex: 0.85; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 4px; color: var(--red); font-weight: 800; letter-spacing: 1px; font-size: clamp(0.7rem, 2.3vmin, 0.9rem); }
-.passline-row { flex: 1.35; display: grid; grid-template-columns: 1fr 4fr 1fr; gap: 4px; }
-.odds-sq { border: 1px dashed var(--line-soft); border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: clamp(0.48rem, 1.7vmin, 0.62rem); font-weight: 800; letter-spacing: 1px; color: var(--muted); line-height: 1.05; }
+.passline-row { flex: 1.8; display: grid; grid-template-columns: 3fr 1fr; gap: 4px; }
+.odds-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 4px; min-height: 0; }
+.odds-sq { border: 1px dashed var(--line-soft); border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: clamp(0.42rem, 1.4vmin, 0.56rem); font-weight: 800; letter-spacing: 0.5px; color: var(--muted); line-height: 1.05; padding: 2px; overflow: hidden; }
 .odds-sq.dont { color: #ff8a8a; }
 .pass-line { border: 1px solid var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; background: rgba(243,195,74,0.06); }
 .pass-title { font-size: clamp(1rem, 3.7vmin, 1.4rem); font-weight: 800; color: var(--gold); letter-spacing: 3px; }
@@ -133,9 +134,8 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .c500 { background:#6a2da0; }
 
 /* ---------- Control panel (compact, fixed height) ---------- */
-.panel { flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; }
-
-.panel-top { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 5px 10px; }
+.topbar { flex: 0 0 auto; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 5px 10px; }
+.dock { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; }
 .pt-head { display: flex; align-items: center; }
 .brand { font-weight: 800; letter-spacing: 2px; color: #fff; font-size: 0.9rem; }
 .reset-btn { margin-left: auto; background: var(--gold); border: none; color: #1a1207; border-radius: 9px; padding: 5px 11px; cursor: pointer; font-size: 0.66rem; font-weight: 800; letter-spacing: 1px; }
@@ -150,11 +150,13 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .stat-sub { margin-top: 3px; font-size: 0.6rem; color: var(--muted); }
 .stat-sub b { color: var(--text); }
 
-.dice-btn { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; background: rgba(243,195,74,0.12); border: 1px solid var(--gold); border-radius: 11px; padding: 8px; cursor: pointer; color: var(--text); }
-.dice-btn:active { transform: translateY(1px); }
-.dice-btn:disabled { opacity: 0.55; cursor: default; }
-.roll-cta { font-size: 0.62rem; letter-spacing: 1px; color: var(--gold); font-weight: 800; }
-.history { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; min-height: 13px; }
+.diceline { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: clamp(40px, 9.5vmin, 54px); }
+.bet-row { display: flex; align-items: stretch; gap: 8px; }
+.roll-btn { flex: 0 0 auto; min-width: 92px; background: var(--gold); color: #1a1207; border: none; border-radius: 11px; padding: 0 14px; font-size: 0.92rem; font-weight: 800; letter-spacing: 1px; cursor: pointer; box-shadow: var(--shadow); line-height: 1.05; }
+.roll-btn:hover { filter: brightness(1.06); }
+.roll-btn:active { transform: translateY(1px); }
+.roll-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.history { display: inline-flex; gap: 3px; flex-wrap: wrap; vertical-align: middle; }
 .history .h-pill { font-size: 0.6rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--muted); }
 .history .h-pill.seven { color: #ff8a8a; }
 .history .h-pill.point { color: var(--gold); }
@@ -180,9 +182,8 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .win-banner.show-win .amt { color: var(--gold); font-size: 1.1rem; display: block; }
 .win-banner.show-lose { color: #ff8a8a; }
 
-.controls { display: flex; flex-direction: column; gap: 5px; }
 .hint { text-align: center; font-size: 0.6rem; color: var(--muted); }
-.chip-rail { display: flex; gap: 6px; justify-content: center; }
+.chip-rail { display: flex; gap: 6px; justify-content: center; flex: 1; }
 .chip { width: clamp(38px, 9vmin, 46px); height: clamp(38px, 9vmin, 46px); border-radius: 50%; border: 3px dashed rgba(255,255,255,0.85); color: #fff; font-weight: 800; font-size: 0.72rem; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.1s; }
 .chip.selected { outline: 3px solid var(--gold); outline-offset: 1px; transform: translateY(-3px); }
 .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
@@ -240,10 +241,4 @@ body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: manip
 .toast.win { border-color: var(--win); }
 .toast.lose { border-color: #ff8a8a; }
 
-/* ---------- Landscape / wide: table left, controls right ---------- */
-@media (min-aspect-ratio: 1/1) {
-  .app { flex-direction: row; }
-  .felt { flex: 1 1 auto; }
-  .panel { flex: 0 0 clamp(250px, 26vw, 330px); }
-  .controls { margin-top: auto; }
-}
+/* Header / table / dock stack the same way in every orientation. */

@@ -9,6 +9,20 @@
 <body>
   <div class="app" id="app">
 
+    <!-- Header: stats + new game (top of screen) -->
+    <header class="topbar">
+      <div class="pt-head">
+        <span class="brand">🎲 CRAPS</span>
+        <button class="reset-btn" id="resetBtn" title="Start a new game">↻ NEW GAME</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-label">BANKROLL</span><span id="bankroll" class="stat-val gold">$1,000</span></div>
+        <div class="stat"><span class="stat-label">BUY-IN</span><span id="buyIn" class="stat-val">$1,000</span></div>
+        <div class="stat"><span class="stat-label">NET P/L</span><span id="netPL" class="stat-val">$0</span></div>
+      </div>
+      <div class="stat-sub">On the table: <b id="atRisk">$0</b> <span class="history" id="history" aria-label="Recent rolls"></span></div>
+    </header>
+
     <!-- Betting table -->
     <section class="felt">
 
@@ -108,31 +122,30 @@
       </div>
 
       <div class="passline-row">
-        <div class="bet-spot odds-sq dont" data-bet="dpodds" data-payout="trueodds-dont"><span>DON'T<br>ODDS</span></div>
         <div class="bet-spot pass-line" data-bet="pass" data-payout="1:1"><span class="pass-title">PASS LINE</span></div>
-        <div class="bet-spot odds-sq" data-bet="passodds" data-payout="trueodds"><span>PASS<br>ODDS</span></div>
+        <div class="odds-stack">
+          <div class="bet-spot odds-sq dont" data-bet="dpodds" data-payout="trueodds-dont"><span>DON'T ODDS</span></div>
+          <div class="bet-spot odds-sq" data-bet="passodds" data-payout="trueodds"><span>PASS ODDS</span></div>
+        </div>
       </div>
 
       <div class="puck off" id="puck">OFF</div>
     </section>
 
-    <!-- Side panel: status, dice, controls -->
-    <aside class="panel">
-      <div class="panel-top">
-        <div class="pt-head">
-          <span class="brand">🎲 CRAPS</span>
-          <button class="reset-btn" id="resetBtn" title="Start a new game">↻ NEW GAME</button>
+    <!-- Bottom dock: dice result, chips + roll, actions -->
+    <div class="dock">
+      <div class="diceline">
+        <div class="dice-area">
+          <div class="die3d" id="die1"></div>
+          <div class="die3d" id="die2"></div>
         </div>
-        <div class="stats">
-          <div class="stat"><span class="stat-label">BANKROLL</span><span id="bankroll" class="stat-val gold">$1,000</span></div>
-          <div class="stat"><span class="stat-label">BUY-IN</span><span id="buyIn" class="stat-val">$1,000</span></div>
-          <div class="stat"><span class="stat-label">NET P/L</span><span id="netPL" class="stat-val">$0</span></div>
+        <div class="result-block">
+          <div class="result-number" id="resultNumber">—</div>
+          <div class="win-banner" id="winBanner"></div>
         </div>
-        <div class="stat-sub">On the table: <b id="atRisk">$0</b></div>
       </div>
 
-      <div class="controls">
-        <div class="history" id="history" aria-label="Recent rolls"></div>
+      <div class="bet-row">
         <div class="chip-rail" id="chipRail">
           <button class="chip c1" data-chip="1">1</button>
           <button class="chip c5" data-chip="5">5</button>
@@ -140,30 +153,21 @@
           <button class="chip c100" data-chip="100">100</button>
           <button class="chip c500" data-chip="500">500</button>
         </div>
-        <button class="dice-btn" id="rollBtn" title="Tap to roll">
-          <div class="dice-area">
-            <div class="die3d" id="die1"></div>
-            <div class="die3d" id="die2"></div>
-          </div>
-          <div class="result-block">
-            <div class="result-number" id="resultNumber">—</div>
-            <div class="win-banner" id="winBanner"></div>
-          </div>
-          <span class="roll-cta">TAP&nbsp;TO&nbsp;ROLL</span>
-        </button>
-        <div class="action-row">
-          <button class="act-btn" id="undoBtn" title="Undo last bet"><span class="act-ico">↶</span><span class="act-label">UNDO</span></button>
-          <button class="act-btn" id="rebetBtn" title="Repeat last round's bets"><span class="act-ico">⟳</span><span class="act-label">REBET</span></button>
-          <button class="act-btn" id="doubleBtn" title="Double every bet on the table"><span class="act-ico">×2</span><span class="act-label">DOUBLE</span></button>
-          <button class="act-btn" id="removeBtn" title="Toggle remove mode, then tap bets to take them down"><span class="act-ico">✕</span><span class="act-label">REMOVE</span></button>
-        </div>
-        <div class="hint">Tap a bet to add · tap REMOVE then a bet to take it down</div>
-        <details class="log-wrap">
-          <summary>Roll log</summary>
-          <div id="log" class="log" aria-live="polite"></div>
-        </details>
+        <button class="roll-btn" id="rollBtn">ROLL<br>DICE</button>
       </div>
-    </aside>
+
+      <div class="action-row">
+        <button class="act-btn" id="undoBtn" title="Undo last bet"><span class="act-ico">↶</span><span class="act-label">UNDO</span></button>
+        <button class="act-btn" id="rebetBtn" title="Repeat last round's bets"><span class="act-ico">⟳</span><span class="act-label">REBET</span></button>
+        <button class="act-btn" id="doubleBtn" title="Double every bet on the table"><span class="act-ico">×2</span><span class="act-label">DOUBLE</span></button>
+        <button class="act-btn" id="removeBtn" title="Toggle remove mode, then tap bets to take them down"><span class="act-ico">✕</span><span class="act-label">REMOVE</span></button>
+      </div>
+      <div class="hint">Tap a bet to add · tap REMOVE then a bet to take it down</div>
+      <details class="log-wrap">
+        <summary>Roll log</summary>
+        <div id="log" class="log" aria-live="polite"></div>
+      </details>
+    </div>
 
   </div>
 
