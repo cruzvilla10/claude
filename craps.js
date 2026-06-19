@@ -10,6 +10,7 @@
   const STORAGE_KEY = "craps.state.v2";
   const START_BANKROLL = 1000;
   const MAX_ODDS_MULT = 3;
+  const ODDS_TYPES = ["passodds", "dpodds", "comeodds", "dccomeodds"];
   const POINTS = [4, 5, 6, 8, 9, 10];
 
   // Pip positions on a 3x3 grid (indices 0-8, row-major) for each die value.
@@ -213,7 +214,8 @@
   }
 
   function doubleAll() {
-    const entries = Object.entries(state.bets).filter(([k, b]) => isRemovable(k, b));
+    // Skip odds bets so doubling can't push them past the max-odds cap.
+    const entries = Object.entries(state.bets).filter(([k, b]) => isRemovable(k, b) && !ODDS_TYPES.includes(b.type));
     if (!entries.length) { toast("No bets to double."); return; }
     let added = 0;
     for (const [key, bet] of entries) {
@@ -235,6 +237,8 @@
       let type = bet.type, num = bet.num;
       if (type === "comepoint") { type = "come"; num = null; }
       if (type === "dccomepoint") { type = "dontcome"; num = null; }
+      // odds depend on a live point/come point — re-add them manually (capped)
+      if (ODDS_TYPES.includes(type)) { skipped++; continue; }
       if (!canPlace(type)) { skipped++; continue; }
       if (bet.amount > state.bankroll) { skipped++; continue; }
       addToBet(type, num, bet.payout || "1:1", bet.amount, true);
