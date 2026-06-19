@@ -70,6 +70,10 @@
       rebetBtn: $("#rebetBtn"),
       doubleBtn: $("#doubleBtn"),
       resetBtn: $("#resetBtn"),
+      modal: $("#modal"),
+      buyinOpts: $("#buyinOpts"),
+      modalStart: $("#modalStart"),
+      modalCancel: $("#modalCancel"),
     };
   }
 
@@ -649,10 +653,19 @@
     (col && col.appendChild ? col : felt).appendChild(puck);
   }
 
-  // Layout is fully fluid now (fills the viewport via CSS), so no JS scaling
-  // is needed. Kept as a no-op so existing listeners stay harmless.
+  // The game is rendered at a comfortable fixed design size and scaled to
+  // fit the viewport — guarantees nothing overlaps and everything is visible.
   function fitScreen() {
-    if (els.app && els.app.style) els.app.style.transform = "none";
+    const app = els.app;
+    if (!app || !app.style || typeof window === "undefined") return;
+    app.style.transform = "none";
+    const w = app.offsetWidth, h = app.offsetHeight;
+    if (!w || !h) return;
+    const vv = window.visualViewport;
+    const availW = (vv ? vv.width : window.innerWidth);
+    const availH = (vv ? vv.height : window.innerHeight);
+    const scale = Math.min(availW / w, availH / h);
+    app.style.transform = `scale(${scale > 0 ? scale : 1})`;
   }
 
   function renderHistory() {
@@ -800,6 +813,33 @@
     if (d && d.chip) d.chip.style.visibility = "";
   }
 
+  // ---- New game / settings modal -------------------------------------------
+  let pendingBuyIn = START_BANKROLL;
+  function openModal() {
+    pendingBuyIn = state.buyIn || START_BANKROLL;
+    if (els.buyinOpts && els.buyinOpts.querySelectorAll) {
+      els.buyinOpts.querySelectorAll("button").forEach((b) =>
+        b.classList.toggle("sel", Number(b.dataset.amt) === pendingBuyIn));
+    }
+    if (els.modal) els.modal.hidden = false;
+  }
+  function closeModal() { if (els.modal) els.modal.hidden = true; }
+  function newGame(amount) {
+    state = defaultState();
+    state.bankroll = amount;
+    state.buyIn = amount;
+    undoStack = []; flashKeys = [];
+    save();
+    if (els.log) els.log.innerHTML = "";
+    if (els.resultNumber) els.resultNumber.textContent = "—";
+    if (els.winBanner) { els.winBanner.className = "win-banner"; els.winBanner.innerHTML = ""; }
+    renderDie(els.die1, 3); renderDie(els.die2, 4);
+    render();
+    closeModal();
+    addLog(`New game — buy-in $${amount.toLocaleString()}.`, "log-info");
+    toast(`New game! Buy-in $${amount.toLocaleString()}.`, "win");
+  }
+
   // ---- Wiring ---------------------------------------------------------------
   function wire() {
     els.chipRail.addEventListener("click", (e) => {
@@ -820,19 +860,17 @@
     els.undoBtn.addEventListener("click", undo);
     els.rebetBtn.addEventListener("click", rebet);
     els.doubleBtn.addEventListener("click", doubleAll);
-    els.resetBtn.addEventListener("click", () => {
-      if (confirm("Reset bankroll to $1,000 and clear the table?")) {
-        state = defaultState(); undoStack = []; flashKeys = [];
-        save();
-        if (els.log) els.log.innerHTML = "";
-        if (els.resultNumber) els.resultNumber.textContent = "—";
-        if (els.winBanner) { els.winBanner.className = "win-banner"; els.winBanner.innerHTML = ""; }
-        renderDie(els.die1, 1); renderDie(els.die2, 1);
-        render();
-        toast("Bankroll reset to $1,000.");
-      }
+    els.resetBtn.addEventListener("click", openModal);
+    els.modalCancel.addEventListener("click", closeModal);
+    els.modal.addEventListener("click", (e) => { if (e.target === els.modal) closeModal(); });
+    els.buyinOpts.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      pendingBuyIn = Number(b.dataset.amt);
+      els.buyinOpts.querySelectorAll("button").forEach((x) => x.classList.toggle("sel", x === b));
     });
+    els.modalStart.addEventListener("click", () => newGame(pendingBuyIn));
     document.addEventListener("keydown", (e) => {
+      if (e.code === "Escape") { closeModal(); return; }
       if ((e.code === "Space" || e.code === "Enter") && (!document.activeElement || document.activeElement.tagName !== "BUTTON")) {
         e.preventDefault(); roll();
       }

@@ -123,7 +123,7 @@
       <div class="panel-top">
         <div class="pt-head">
           <span class="brand">🎲 CRAPS</span>
-          <button class="reset-btn" id="resetBtn" title="Cash in / reset to $1,000">⟲ $1000</button>
+          <button class="reset-btn" id="resetBtn" title="Start a new game">↻ NEW GAME</button>
         </div>
         <div class="stats">
           <div class="stat"><span class="stat-label">BANKROLL</span><span id="bankroll" class="stat-val gold">$1,000</span></div>
@@ -166,6 +166,23 @@
       </div>
     </aside>
 
+  </div>
+
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal-card">
+      <h2>NEW GAME</h2>
+      <p>Pick your buy-in. This clears the table and starts you fresh.</p>
+      <div class="buyin-opts" id="buyinOpts">
+        <button data-amt="500">$500</button>
+        <button data-amt="1000" class="sel">$1,000</button>
+        <button data-amt="5000">$5,000</button>
+        <button data-amt="10000">$10,000</button>
+      </div>
+      <div class="modal-actions">
+        <button class="m-ghost" id="modalCancel">Cancel</button>
+        <button class="m-primary" id="modalStart">Start Game</button>
+      </div>
+    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
