@@ -83,6 +83,24 @@ s = rollWith({ bets: { c: { type: "c", amount: 5 } } }, 1, 1); eq(s.credit, 1035
 s = rollWith({ bets: { "hard-8": { type: "hard", num: 8, amount: 5 } } }, 4, 4); eq(s.credit, 1040, "hard 8 hits (9:1, +45 profit, stake stays)");
 s = rollWith({ bets: { "hard-8": { type: "hard", num: 8, amount: 5 } } }, 5, 3); eq(s.credit, 995, "hard 8 easy loses");
 
+// ==== Bonus bets (Low / High / Roll 'Em All) ==============================
+// bonusStep progression
+let b = c.bonusStep("lowrolls", [2, 3, 4], 5); eq(b.result, "progress", "low rolls progress on 5");
+eq(b.hits.length, 4, "low rolls now has 4 hits");
+b = c.bonusStep("lowrolls", [2, 3, 4, 5], 6); eq(b.result, "win", "low rolls completes on last number (6)");
+eq(b.mult, 30, "low rolls pays 30:1");
+b = c.bonusStep("lowrolls", [2, 3, 4, 5], 7); eq(b.result, "lose", "low rolls dies on 7");
+b = c.bonusStep("lowrolls", [2, 3, 4], 4); eq(b.hits.length, 3, "duplicate number doesn't add a hit");
+b = c.bonusStep("allrolls", [2,3,4,5,6,8,9,10,11], 12); eq(b.result, "win", "roll 'em all completes");
+eq(b.mult, 155, "roll 'em all pays 155:1");
+
+// integrated: place a low-rolls bet and complete it
+s = rollWith({ point: null, bets: { lowrolls: { type: "lowrolls", amount: 5, hits: [2, 3, 4, 5] } } }, 3, 3); // 6 completes
+eq(s.credit, 1000 - 5 + 5 + 150, "low rolls $5 completes -> +$150 (30:1) plus stake");
+// dies on 7
+s = rollWith({ point: 5, bets: { lowrolls: { type: "lowrolls", amount: 5, hits: [2, 3] } } }, 3, 4);
+eq(s.credit, 995, "low rolls loses on 7");
+
 // ==== Point transitions (pure) ============================================
 eq(c.nextPoint(null, 7).point, null, "come-out 7 off");
 eq(c.nextPoint(null, 2).point, 2, "come-out 2 -> point 2");

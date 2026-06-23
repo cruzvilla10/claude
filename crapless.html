@@ -14,7 +14,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="crapless.css?v=3" />
+  <link rel="stylesheet" href="crapless.css?v=4" />
 </head>
 <body>
   <div id="machine">
@@ -39,16 +39,17 @@
 
       <!-- Bonus row (Phase 2 wiring) -->
       <section class="bonus">
-        <div class="bonus-cell bet-spot" data-bet="allsmall" data-phase2>
-          <div class="bonus-track">2 3 4 5 6</div>
-          <h4>LOW ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+        <div class="bonus-cell bet-spot" data-bet="lowrolls" data-payout="30:1">
+          <div class="bonus-track" data-set="low"><span data-n="2">2</span><span data-n="3">3</span><span data-n="4">4</span><span data-n="5">5</span><span data-n="6">6</span></div>
+          <h4>LOW ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b><div class="bonus-slot"></div>
         </div>
-        <div class="bonus-cell bet-spot center" data-bet="allnumbers" data-phase2>
-          <h4>ROLL 'EM ALL</h4><span class="sub">BET HERE</span><b>155 TO 1</b>
+        <div class="bonus-cell bet-spot center" data-bet="allrolls" data-payout="155:1">
+          <div class="bonus-track" data-set="all"><span data-n="2">2</span><span data-n="3">3</span><span data-n="4">4</span><span data-n="5">5</span><span data-n="6">6</span><span data-n="8">8</span><span data-n="9">9</span><span data-n="10">10</span><span data-n="11">11</span><span data-n="12">12</span></div>
+          <h4>ROLL 'EM ALL</h4><span class="sub">BET HERE</span><b>155 TO 1</b><div class="bonus-slot"></div>
         </div>
-        <div class="bonus-cell bet-spot" data-bet="alltall" data-phase2>
-          <div class="bonus-track">8 9 10 11 12</div>
-          <h4>HIGH ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+        <div class="bonus-cell bet-spot" data-bet="highrolls" data-payout="30:1">
+          <div class="bonus-track" data-set="high"><span data-n="8">8</span><span data-n="9">9</span><span data-n="10">10</span><span data-n="11">11</span><span data-n="12">12</span></div>
+          <h4>HIGH ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b><div class="bonus-slot"></div>
         </div>
       </section>
 
@@ -97,9 +98,9 @@
             <button class="roll-btn" id="rollBtn">ROLL DICE</button>
           </div>
           <div class="press-row">
-            <button class="ctrl-btn small" disabled>SET BETS OFF</button>
-            <button class="ctrl-btn small" disabled>PRESS</button>
-            <button class="ctrl-btn small" disabled>ACROSS</button>
+            <button class="ctrl-btn small" id="setOffBtn">SET BETS OFF</button>
+            <button class="ctrl-btn small" id="pressBtn">PRESS</button>
+            <button class="ctrl-btn small" id="acrossBtn">ACROSS</button>
           </div>
         </div>
 
@@ -142,6 +143,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="crapless.js?v=3"></script>
+  <script src="crapless.js?v=4"></script>
 </body>
 </html>

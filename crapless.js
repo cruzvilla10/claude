@@ -43,6 +43,22 @@
   }
   const floor = (n) => Math.floor(n);
 
+  // Bonus "roll all the numbers before a 7" bets (All Small / All / All Tall).
+  const BONUS = {
+    lowrolls: [2, 3, 4, 5, 6],
+    highrolls: [8, 9, 10, 11, 12],
+    allrolls: [2, 3, 4, 5, 6, 8, 9, 10, 11, 12],
+  };
+  const BONUS_PAY = { lowrolls: 30, highrolls: 30, allrolls: 155 };
+  // Pure: advance a bonus bet by one roll. Returns result + updated hits.
+  function bonusStep(type, hits, total) {
+    const req = BONUS[type];
+    if (total === 7) return { result: "lose", hits };
+    const nh = (req.includes(total) && !hits.includes(total)) ? hits.concat(total) : hits;
+    if (req.every((n) => nh.includes(n))) return { result: "win", hits: nh, mult: BONUS_PAY[type] };
+    return { result: "progress", hits: nh };
+  }
+
   // ---- State ----------------------------------------------------------------
   const defaultState = () => ({
     credit: START_CREDIT,
@@ -54,6 +70,7 @@
     lastRoundBets: null, // for REPEAT
     lastBet: 0,
     lastWin: 0,
+    placeOff: false,     // SET BETS OFF: place bets idle on the come-out
   });
 
   let state = loadState();
@@ -176,6 +193,24 @@
     for (const key of Object.keys(state.bets)) {
       if (key === "come") continue;
       const bet = state.bets[key];
+      // Bonus "roll all numbers" bets track hits across rolls.
+      if (BONUS[bet.type]) {
+        const br = bonusStep(bet.type, bet.hits || [], total);
+        bet.hits = br.hits;
+        if (br.result === "win") {
+          const profit = bet.amount * br.mult;
+          state.credit += bet.amount + profit; netDelta += profit; grossWin += profit; flashKeys.push(key);
+          messages.push({ cls: "log-win", text: `${prettyName(key, bet)} HITS! +$${profit}` });
+          delete state.bets[key];
+        } else if (br.result === "lose") {
+          netDelta -= bet.amount;
+          messages.push({ cls: "log-lose", text: `${prettyName(key, bet)} loses -$${bet.amount}` });
+          delete state.bets[key];
+        }
+        continue;
+      }
+      // Place bets are idle on the come-out when SET BETS OFF is active.
+      if (bet.type === "place" && state.placeOff && comeOut) continue;
       const r = evaluate(bet, total, isHard, pointBefore, comeOut);
       const name = prettyName(key, bet);
       if (r.result === "win") {
@@ -230,12 +265,16 @@
       log: $("#log"), toast: $("#toast"), rollBtn: $("#rollBtn"),
       clearBtn: $("#clearBtn"), doubleBtn: $("#doubleBtn"), repeatBtn: $("#repeatBtn"),
       cashoutBtn: $("#cashoutBtn"),
+      acrossBtn: $("#acrossBtn"), pressBtn: $("#pressBtn"), setOffBtn: $("#setOffBtn"),
     };
   }
 
   function addToBet(type, num, payout, amount, track) {
     const key = betKeyFor(type, num);
-    if (!state.bets[key]) state.bets[key] = { type, num: num != null ? num : null, amount: 0, payout };
+    if (!state.bets[key]) {
+      state.bets[key] = { type, num: num != null ? num : null, amount: 0, payout };
+      if (BONUS[type]) state.bets[key].hits = [];
+    }
     state.bets[key].amount += amount;
     state.credit -= amount;
     if (track) undoStack.push({ key, amount });
@@ -310,6 +349,24 @@
     toast(placed ? `Repeated (+$${placed}).` : "Couldn't repeat now.");
   }
 
+  // ---- Quick-bet controls ---------------------------------------------------
+  function across() {
+    const amt = state.selectedChip; let added = 0;
+    for (const n of POINTS) { if (state.credit >= amt) { addToBet("place", n, null, amt, true); added += amt; } }
+    save(); render();
+    toast(added ? `Across — placed $${state.selectedChip} on every number.` : "Not enough credit.");
+  }
+  function press() {
+    let added = 0;
+    for (const [key, bet] of Object.entries(state.bets)) {
+      if (bet.type !== "place") continue;
+      if (bet.amount <= state.credit) { addToBet(bet.type, bet.num, bet.payout, bet.amount, true); added += bet.amount; }
+    }
+    save(); render();
+    toast(added ? `Pressed place bets (+$${added}).` : "No place bets to press.");
+  }
+  function setBetsOff() { state.placeOff = !state.placeOff; save(); render(); toast(state.placeOff ? "Place bets OFF on the come-out." : "Place bets working."); }
+
   // ---- Dice rolling ---------------------------------------------------------
   let rolling = false;
   function roll() {
@@ -361,6 +418,7 @@
       case "place": return `Place ${n}`; case "hard": return `Hard ${n}`;
       case "field": return "Field"; case "seven": return "Seven"; case "anycraps": return "Any Craps";
       case "c": return "C (Craps)"; case "e": return "E (Eleven)"; case "ce": return "C & E"; case "horn": return "Horn";
+      case "lowrolls": return "Low Rolls"; case "highrolls": return "High Rolls"; case "allrolls": return "Roll 'Em All";
       default: return key;
     }
   }
@@ -386,6 +444,7 @@
       case "e": return { el: q('[data-bet="e"]') };
       case "ce": return { el: q('[data-bet="ce"]') };
       case "horn": return { el: q('[data-bet="horn"]') };
+      case "lowrolls": case "highrolls": case "allrolls": return { el: q(`[data-bet="${bet.type}"] .bonus-slot`), flat: true };
       default: return { el: null };
     }
   }
@@ -434,6 +493,14 @@
       els.felt.querySelectorAll(".bet-spot").forEach((s) => { const t = s.dataset && s.dataset.bet; s.classList.toggle("armed", ctx.includes(t) && canPlace(t)); });
     }
     if (els.tray && els.tray.querySelectorAll) els.tray.querySelectorAll(".chip").forEach((c) => c.classList.toggle("selected", Number(c.dataset.chip) === state.selectedChip));
+    if (els.setOffBtn && els.setOffBtn.classList) { els.setOffBtn.classList.toggle("active", state.placeOff); els.setOffBtn.textContent = state.placeOff ? "BETS ARE OFF" : "SET BETS OFF"; }
+    // light up bonus trackers from each active bonus bet's hits
+    if (els.felt && els.felt.querySelectorAll) {
+      [["low", "lowrolls"], ["all", "allrolls"], ["high", "highrolls"]].forEach(([set, type]) => {
+        const bet = state.bets[type], track = els.felt.querySelector(`.bonus-track[data-set="${set}"]`);
+        if (track && track.querySelectorAll) track.querySelectorAll("span").forEach((sp) => sp.classList.toggle("hit", !!(bet && bet.hits && bet.hits.includes(Number(sp.dataset.n)))));
+      });
+    }
     renderChips(); renderHistory(); positionPuck();
   }
 
@@ -480,6 +547,9 @@
     els.clearBtn.addEventListener("click", clearLast);
     els.doubleBtn.addEventListener("click", doubleAll);
     els.repeatBtn.addEventListener("click", repeatLast);
+    if (els.acrossBtn) els.acrossBtn.addEventListener("click", across);
+    if (els.pressBtn) els.pressBtn.addEventListener("click", press);
+    if (els.setOffBtn) els.setOffBtn.addEventListener("click", setBetsOff);
     if (els.cashoutBtn) els.cashoutBtn.addEventListener("click", () => {
       if (confirm("Cash out and start a fresh $1,000 session?")) { state = defaultState(); undoStack = []; flashKeys = []; save(); if (els.log) els.log.innerHTML = ""; if (els.resultNumber) els.resultNumber.textContent = "—"; renderDie(els.die1, 3); renderDie(els.die2, 4); render(); }
     });
@@ -497,6 +567,6 @@
 
   if (typeof module !== "undefined" && module.exports) {
     if (typeof document === "undefined") initEls();
-    module.exports = { evaluate, placeProfit, trueOddsProfit, hardProfit, nextPoint, resolveRoll, getState: () => state, setState: (s) => { state = Object.assign(defaultState(), s); } };
+    module.exports = { evaluate, placeProfit, trueOddsProfit, hardProfit, nextPoint, bonusStep, BONUS_PAY, resolveRoll, getState: () => state, setState: (s) => { state = Object.assign(defaultState(), s); } };
   }
 })();

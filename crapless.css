@@ -77,7 +77,11 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #03110a;
 .bonus-cell h4 { margin: 0; font-size: clamp(0.8rem,1.1vw,1.1rem); letter-spacing: 1px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
 .bonus-cell .sub { font-size: 0.52rem; letter-spacing: 1px; color: #bcd9c4; }
 .bonus-cell b { font-size: clamp(0.95rem,1.3vw,1.25rem); font-weight: 900; background: var(--gold-metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.bonus-track { font-size: clamp(0.66rem,0.9vw,0.85rem); letter-spacing: 3px; font-weight: 800; color: var(--gold-2); }
+.bonus-track { display: flex; gap: clamp(2px,0.3vw,4px); justify-content: center; flex-wrap: wrap; }
+.bonus-track span { font-size: clamp(0.5rem,0.7vw,0.68rem); font-weight: 800; color: #9fc7ab; min-width: clamp(13px,1.1vw,18px); text-align: center; border-radius: 4px; padding: 0 2px; background: rgba(0,0,0,0.3); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); transition: color 0.15s, background 0.15s, box-shadow 0.15s; }
+.bonus-track span.hit { color: #2a1c00; background: var(--gold-metal); box-shadow: 0 0 9px rgba(243,195,74,0.75); }
+.bonus-slot { position: absolute; right: 5px; bottom: 5px; }
+.ctrl-btn.active { background: linear-gradient(180deg,#ffd884,#dc9e1c); color: #2a1c00; box-shadow: var(--bevel), 0 0 14px rgba(243,195,74,0.6); }
 
 /* Numbers row */
 .numbers { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(4px,0.5vw,7px); flex: 0 0 clamp(120px,21vh,180px); }
