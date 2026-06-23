@@ -409,6 +409,19 @@
     for (let i = 0; i < 9; i++) { const c = document.createElement("div"); if (on.includes(i)) c.className = "pip"; el.appendChild(c); }
   }
   function restartAnim(el, cls) { if (!el || !el.classList) return; el.classList.remove(cls); if (typeof el.offsetWidth === "number") void el.offsetWidth; el.classList.add(cls); }
+  function renderMiniDie(value) {
+    const die = document.createElement("span"); die.className = "mini-die";
+    const on = PIPS[value] || [];
+    for (let i = 0; i < 9; i++) { const c = document.createElement("span"); if (on.includes(i)) c.className = "mp"; die.appendChild(c); }
+    return die;
+  }
+  function renderStaticDice() {
+    if (typeof document === "undefined" || !document.querySelectorAll) return;
+    document.querySelectorAll("[data-faces]").forEach((host) => {
+      host.innerHTML = "";
+      String(host.dataset.faces || "").split(",").forEach((f) => { const v = parseInt(f, 10); if (v) host.appendChild(renderMiniDie(v)); });
+    });
+  }
 
   function prettyName(key, bet) {
     const n = bet.num;
@@ -464,11 +477,13 @@
   }
   function positionPuck() {
     const puck = els.puck, felt = els.felt;
-    if (!puck || !felt || !felt.appendChild) return;
-    if (state.point === null) { puck.className = "puck off"; puck.textContent = "OFF"; const home = felt.querySelector && felt.querySelector(".puck-home"); (home && home.appendChild ? home : felt).appendChild(puck); return; }
+    if (!puck || !felt || !felt.querySelector) return;
+    const numbers = felt.querySelector(".numbers");
+    if (numbers && numbers.appendChild && puck.parentElement !== numbers) numbers.appendChild(puck);
+    if (state.point === null) { puck.className = "puck off"; puck.textContent = "OFF"; if (puck.style) { puck.style.left = "4%"; puck.style.top = "3px"; } return; }
     puck.className = "puck on"; puck.textContent = "ON";
-    const cell = felt.querySelector && felt.querySelector(`.num-cell[data-num="${state.point}"] .puck-rail`);
-    (cell && cell.appendChild ? cell : felt).appendChild(puck);
+    const order = [2, 3, 4, 5, 6, 8, 9, 10, 11, 12], idx = order.indexOf(state.point);
+    if (puck.style) { puck.style.left = ((idx + 0.5) * 10) + "%"; puck.style.top = "2px"; }
   }
   function renderHistory() {
     if (!els.history || !els.history.appendChild) return;
@@ -559,6 +574,7 @@
   function boot() {
     initEls(); wire();
     renderDie(els.die1, 3); renderDie(els.die2, 4);
+    renderStaticDice();
     render();
     addLog("Welcome to Crapless Craps. On the come-out only 7 wins — every other number becomes the point.", "log-info");
   }

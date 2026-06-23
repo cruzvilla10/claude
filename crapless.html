@@ -14,7 +14,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="crapless.css?v=4" />
+  <link rel="stylesheet" href="crapless.css?v=5" />
 </head>
 <body>
   <div id="machine">
@@ -23,8 +23,10 @@
     <header class="topbar">
       <button id="cashoutBtn" class="ctrl-btn cashout">CASH OUT</button>
       <div class="readout"><span class="lbl">CREDIT</span><span id="credit" class="val">$1,000</span></div>
-      <div class="min-bet">Minimum total bet: $3</div>
-      <div class="brand">CRAPLESS <span>CRAPS</span></div>
+      <div class="center-stack">
+        <div class="brand">CRAPLESS <span>CRAPS</span></div>
+        <div class="min-bet">Minimum total bet: $3</div>
+      </div>
       <div class="session">
         <div><span class="lbl">LAST BET</span><b id="lastBet">$0</b></div>
         <div><span class="lbl">LAST WIN</span><b id="lastWin">$0</b></div>
@@ -74,14 +76,14 @@
         <aside class="left">
           <div class="panel-h">HARD WAYS</div>
           <div class="hardways">
-            <div class="bet-spot hard" data-bet="hard" data-num="4" data-payout="7:1"><span class="hw-dice">⚁⚁</span><span class="hw-pay">7:1</span><span class="hw-name">HARD 4</span></div>
-            <div class="bet-spot hard" data-bet="hard" data-num="6" data-payout="9:1"><span class="hw-dice">⚂⚂</span><span class="hw-pay">9:1</span><span class="hw-name">HARD 6</span></div>
-            <div class="bet-spot hard" data-bet="hard" data-num="8" data-payout="9:1"><span class="hw-dice">⚃⚃</span><span class="hw-pay">9:1</span><span class="hw-name">HARD 8</span></div>
-            <div class="bet-spot hard" data-bet="hard" data-num="10" data-payout="7:1"><span class="hw-dice">⚄⚄</span><span class="hw-pay">7:1</span><span class="hw-name">HARD 10</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="4" data-payout="7:1"><span class="pips" data-faces="2,2"></span><span class="hw-pay">7:1</span><span class="hw-name">HARD 4</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="6" data-payout="9:1"><span class="pips" data-faces="3,3"></span><span class="hw-pay">9:1</span><span class="hw-name">HARD 6</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="8" data-payout="9:1"><span class="pips" data-faces="4,4"></span><span class="hw-pay">9:1</span><span class="hw-name">HARD 8</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="10" data-payout="7:1"><span class="pips" data-faces="5,5"></span><span class="hw-pay">7:1</span><span class="hw-name">HARD 10</span></div>
           </div>
           <div class="panel-h">ONE ROLL BETS</div>
           <div class="bet-spot oneroll seven" data-bet="seven" data-payout="4:1"><b>4 TO 1</b><span>SEVEN</span><b>4 TO 1</b></div>
-          <div class="bet-spot oneroll horn" data-bet="horn" data-payout="horn"><span>HORN BET</span><small>2·12 = 30:1 · 3·11 = 15:1</small></div>
+          <div class="bet-spot oneroll horn" data-bet="horn" data-payout="horn"><span class="pips" data-faces="1,1"></span><span class="pips" data-faces="1,2"></span><span class="horn-label">HORN</span><span class="pips" data-faces="5,6"></span><span class="pips" data-faces="6,6"></span></div>
           <div class="bet-spot oneroll craps" data-bet="anycraps" data-payout="7:1"><b>7 TO 1</b><span>ANY CRAPS</span><b>7 TO 1</b></div>
         </aside>
 
@@ -143,6 +145,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="crapless.js?v=4"></script>
+  <script src="crapless.js?v=5"></script>
 </body>
 </html>
