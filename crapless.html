@@ -14,7 +14,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="crapless.css?v=1" />
+  <link rel="stylesheet" href="crapless.css?v=2" />
 </head>
 <body>
   <div id="machine">
@@ -28,8 +28,8 @@
       <div class="session">
         <div><span class="lbl">LAST BET</span><b id="lastBet">$0</b></div>
         <div><span class="lbl">LAST WIN</span><b id="lastWin">$0</b></div>
-        <div><span class="lbl">BUY-IN</span><b id="buyIn">$1,000</b></div>
-        <div><span class="lbl">NET</span><b id="netPL" class="pl">$0</b></div>
+        <div><span class="lbl">PLAYABLE</span><b id="playable">$1,000</b></div>
+        <div><span class="lbl">BET</span><b id="betTotal">$0</b></div>
       </div>
       <a class="switch" href="index.html?force=mobile">mobile ›</a>
     </header>
@@ -41,14 +41,14 @@
       <section class="bonus">
         <div class="bonus-cell bet-spot" data-bet="allsmall" data-phase2>
           <div class="bonus-track">2 3 4 5 6</div>
-          <h4>ALL SMALL</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+          <h4>LOW ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
         </div>
         <div class="bonus-cell bet-spot center" data-bet="allnumbers" data-phase2>
           <h4>ROLL 'EM ALL</h4><span class="sub">BET HERE</span><b>155 TO 1</b>
         </div>
         <div class="bonus-cell bet-spot" data-bet="alltall" data-phase2>
           <div class="bonus-track">8 9 10 11 12</div>
-          <h4>ALL TALL</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+          <h4>HIGH ROLLS</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
         </div>
       </section>
 
@@ -142,6 +142,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="crapless.js?v=1"></script>
+  <script src="crapless.js?v=2"></script>
 </body>
 </html>

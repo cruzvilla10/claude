@@ -223,7 +223,7 @@
     const $ = (s) => document.querySelector(s);
     els = {
       machine: $("#machine"), felt: $(".felt"), tray: $("#tray"),
-      credit: $("#credit"), buyIn: $("#buyIn"), netPL: $("#netPL"),
+      credit: $("#credit"), playable: $("#playable"), betTotal: $("#betTotal"),
       lastBet: $("#lastBet"), lastWin: $("#lastWin"),
       die1: $("#die1"), die2: $("#die2"), resultNumber: $("#resultNumber"),
       winBanner: $("#winBanner"), history: $("#history"), puck: $("#puck"),
@@ -314,7 +314,7 @@
   let rolling = false;
   function roll() {
     if (rolling) return;
-    if (!Object.keys(state.bets).length && state.point === null) { toast("Place a bet first."); return; }
+    if (state.point === null && atRiskTotal() < MIN_BET) { toast(`Minimum total bet is $${MIN_BET}.`); return; }
     state.lastBet = Object.values(state.bets).reduce((s, b) => s + b.amount, 0) || state.lastBet;
     rolling = true;
     if (els.rollBtn) els.rollBtn.disabled = true;
@@ -422,12 +422,12 @@
   }
   function atRiskTotal() { return Object.values(state.bets).reduce((s, b) => s + b.amount, 0); }
   function render() {
-    const net = state.credit + atRiskTotal() - state.buyIn;
+    const atRisk = atRiskTotal();
     if (els.credit) els.credit.textContent = `$${state.credit.toLocaleString()}`;
-    if (els.buyIn) els.buyIn.textContent = `$${state.buyIn.toLocaleString()}`;
+    if (els.playable) els.playable.textContent = `$${state.credit.toLocaleString()}`;
+    if (els.betTotal) els.betTotal.textContent = `$${atRisk.toLocaleString()}`;
     if (els.lastBet) els.lastBet.textContent = `$${(state.lastBet || 0).toLocaleString()}`;
     if (els.lastWin) els.lastWin.textContent = `$${(state.lastWin || 0).toLocaleString()}`;
-    if (els.netPL) { els.netPL.textContent = `${net > 0 ? "+" : net < 0 ? "−" : ""}$${Math.abs(net).toLocaleString()}`; els.netPL.className = `pl ${net > 0 ? "pos" : net < 0 ? "neg" : ""}`; }
     if (els.felt && els.felt.querySelectorAll) {
       els.felt.querySelectorAll(".num-cell").forEach((c) => c.classList.toggle("is-point", Number(c.dataset.num) === state.point));
       const ctx = ["pass", "come", "passodds"];
