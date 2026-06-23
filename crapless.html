@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crapless Craps</title>
+  <script>
+    // Small screens get the mobile standard-craps game instead.
+    (function () {
+      try {
+        var force = location.search.indexOf("force=desktop") > -1;
+        var isDesktop = window.matchMedia("(min-width: 1000px) and (pointer: fine)").matches;
+        if (!isDesktop && !force) location.replace("index.html");
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="crapless.css?v=1" />
+</head>
+<body>
+  <div id="machine">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <button id="cashoutBtn" class="ctrl-btn cashout">CASH OUT</button>
+      <div class="readout"><span class="lbl">CREDIT</span><span id="credit" class="val">$1,000</span></div>
+      <div class="min-bet">Minimum total bet: $3</div>
+      <div class="brand">CRAPLESS <span>CRAPS</span></div>
+      <div class="session">
+        <div><span class="lbl">LAST BET</span><b id="lastBet">$0</b></div>
+        <div><span class="lbl">LAST WIN</span><b id="lastWin">$0</b></div>
+        <div><span class="lbl">BUY-IN</span><b id="buyIn">$1,000</b></div>
+        <div><span class="lbl">NET</span><b id="netPL" class="pl">$0</b></div>
+      </div>
+      <a class="switch" href="index.html?force=mobile">mobile ›</a>
+    </header>
+
+    <!-- Felt -->
+    <main class="felt">
+
+      <!-- Bonus row (Phase 2 wiring) -->
+      <section class="bonus">
+        <div class="bonus-cell bet-spot" data-bet="allsmall" data-phase2>
+          <div class="bonus-track">2 3 4 5 6</div>
+          <h4>ALL SMALL</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+        </div>
+        <div class="bonus-cell bet-spot center" data-bet="allnumbers" data-phase2>
+          <h4>ROLL 'EM ALL</h4><span class="sub">BET HERE</span><b>155 TO 1</b>
+        </div>
+        <div class="bonus-cell bet-spot" data-bet="alltall" data-phase2>
+          <div class="bonus-track">8 9 10 11 12</div>
+          <h4>ALL TALL</h4><span class="sub">BET HERE</span><b>30 TO 1</b>
+        </div>
+      </section>
+
+      <!-- Number row 2..12 (Place / Buy) -->
+      <section class="numbers">
+        <div class="num-cell bet-spot" data-bet="place" data-num="2" data-payout="11:2"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">2</div><div class="place-label">PLACE<br>11 TO 2</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="3" data-payout="11:4"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">3</div><div class="place-label">PLACE<br>11 TO 4</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="4" data-payout="9:5"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">4</div><div class="place-label">PLACE<br>9 TO 5</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="5" data-payout="7:5"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">5</div><div class="place-label">PLACE<br>7 TO 5</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="6" data-payout="7:6"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">SIX</div><div class="place-label">PLACE<br>7 TO 6</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="8" data-payout="7:6"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">8</div><div class="place-label">PLACE<br>7 TO 6</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="9" data-payout="7:5"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">NINE</div><div class="place-label">PLACE<br>7 TO 5</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="10" data-payout="9:5"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">10</div><div class="place-label">PLACE<br>9 TO 5</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="11" data-payout="11:4"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">11</div><div class="place-label">PLACE<br>11 TO 4</div><div class="place-slot"></div></div>
+        <div class="num-cell bet-spot" data-bet="place" data-num="12" data-payout="11:2"><div class="puck-rail"></div><div class="buy-slot"></div><div class="num-big">12</div><div class="place-label">PLACE<br>11 TO 2</div><div class="place-slot"></div></div>
+        <div class="puck-home"><div class="puck off" id="puck">OFF</div></div>
+      </section>
+
+      <!-- Lower: left props | center dice | right line bets -->
+      <section class="lower">
+
+        <aside class="left">
+          <div class="panel-h">HARD WAYS</div>
+          <div class="hardways">
+            <div class="bet-spot hard" data-bet="hard" data-num="4" data-payout="7:1"><span class="hw-dice">⚁⚁</span><span class="hw-pay">7:1</span><span class="hw-name">HARD 4</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="6" data-payout="9:1"><span class="hw-dice">⚂⚂</span><span class="hw-pay">9:1</span><span class="hw-name">HARD 6</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="8" data-payout="9:1"><span class="hw-dice">⚃⚃</span><span class="hw-pay">9:1</span><span class="hw-name">HARD 8</span></div>
+            <div class="bet-spot hard" data-bet="hard" data-num="10" data-payout="7:1"><span class="hw-dice">⚄⚄</span><span class="hw-pay">7:1</span><span class="hw-name">HARD 10</span></div>
+          </div>
+          <div class="panel-h">ONE ROLL BETS</div>
+          <div class="bet-spot oneroll seven" data-bet="seven" data-payout="4:1"><b>4 TO 1</b><span>SEVEN</span><b>4 TO 1</b></div>
+          <div class="bet-spot oneroll horn" data-bet="horn" data-payout="horn"><span>HORN BET</span><small>2·12 = 30:1 · 3·11 = 15:1</small></div>
+          <div class="bet-spot oneroll craps" data-bet="anycraps" data-payout="7:1"><b>7 TO 1</b><span>ANY CRAPS</span><b>7 TO 1</b></div>
+        </aside>
+
+        <div class="center-col">
+          <div class="props-circ">
+            <div class="bet-spot circ" data-bet="c" data-payout="7:1">C</div>
+            <div class="bet-spot circ" data-bet="ce" data-payout="ce">C&amp;E</div>
+            <div class="bet-spot circ" data-bet="e" data-payout="15:1">E</div>
+          </div>
+          <div class="dice-panel">
+            <div class="dice-area"><div class="die3d" id="die1"></div><div class="die3d" id="die2"></div></div>
+            <div class="result-number" id="resultNumber">—</div>
+            <div class="win-banner" id="winBanner"></div>
+            <button class="roll-btn" id="rollBtn">ROLL DICE</button>
+          </div>
+          <div class="press-row">
+            <button class="ctrl-btn small" disabled>SET BETS OFF</button>
+            <button class="ctrl-btn small" disabled>PRESS</button>
+            <button class="ctrl-btn small" disabled>ACROSS</button>
+          </div>
+        </div>
+
+        <div class="line-area">
+          <div class="bet-spot come" data-bet="come" data-payout="1:1"><span>COME</span></div>
+          <div class="bet-spot field" data-bet="field" data-payout="field">
+            <span class="field-end"><span class="dbl">PAYS DBL</span><span class="field-circ">2</span></span>
+            <span class="field-mid"><span class="field-nums">3 · 4 · 9 · 10 · 11</span><span class="field-word">FIELD</span></span>
+            <span class="field-end"><span class="dbl">PAYS DBL</span><span class="field-circ">12</span></span>
+          </div>
+          <div class="pass-row">
+            <div class="bet-spot odds" data-bet="passodds" data-payout="trueodds"><span>TAKE<br>ODDS</span></div>
+            <div class="bet-spot pass" data-bet="pass" data-payout="1:1"><span class="pass-title">PASS LINE</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Roll history -->
+      <div id="history" class="history-strip" aria-label="Recent rolls"></div>
+    </main>
+
+    <!-- Chip tray -->
+    <footer id="tray" class="tray">
+      <button id="clearBtn" class="tray-btn">✕ CLEAR LAST</button>
+      <div class="chips">
+        <button class="chip c1" data-chip="1">$1</button>
+        <button class="chip c2" data-chip="2">$2</button>
+        <button class="chip c3" data-chip="3">$3</button>
+        <button class="chip c5 selected" data-chip="5">$5</button>
+        <button class="chip c10" data-chip="10">$10</button>
+        <button class="chip c25" data-chip="25">$25</button>
+        <button class="chip c50" data-chip="50">$50</button>
+        <button class="chip c100" data-chip="100">$100</button>
+      </div>
+      <button id="doubleBtn" class="tray-btn">×2 DOUBLE</button>
+      <button id="repeatBtn" class="tray-btn">↻ REPEAT</button>
+    </footer>
+
+    <details class="log-wrap"><summary>Roll log</summary><div id="log" class="log"></div></details>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="crapless.js?v=1"></script>
+</body>
+</html>

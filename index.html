@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Craps</title>
+  <script>
+    // Desktop gets the Crapless Craps table; phones stay on this game.
+    (function () {
+      try {
+        var force = location.search.indexOf("force=mobile") > -1;
+        var isDesktop = window.matchMedia("(min-width: 1000px) and (pointer: fine)").matches;
+        if (isDesktop && !force) location.replace("crapless.html");
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
