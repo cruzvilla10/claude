@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html styles.css craps.js _site/
-          cp crapless.html crapless.css crapless.js _site/
+          cp crapless.html crapless.css crapless.js felt.jpg _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -20,11 +20,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #02100a; col
   padding: clamp(6px,1vh,12px) clamp(8px,1.2vw,18px);
   border: clamp(9px,1vw,16px) solid #1d1108;
   border-radius: clamp(12px,1.4vw,22px);
-  background:
-    var(--noise),
-    radial-gradient(120% 75% at 50% 6%, rgba(255,255,255,0.12), rgba(255,255,255,0) 46%),
-    radial-gradient(135% 115% at 50% -4%, var(--c-spot) 0%, var(--c1) 24%, var(--c2) 48%, var(--c3) 70%, var(--c4) 86%, var(--c-edge) 100%);
-  background-blend-mode: overlay, screen, normal;
+  background: linear-gradient(rgba(0,0,0,0.04), rgba(0,0,0,0.12)), url("felt.jpg") center/cover no-repeat #063d1c;
   box-shadow:
     inset 0 0 0 2px rgba(243,195,74,0.55),
     inset 0 0 0 5px rgba(0,0,0,0.5),
